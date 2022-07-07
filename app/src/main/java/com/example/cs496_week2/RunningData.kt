@@ -5,10 +5,9 @@ import java.security.cert.CertPath
 
 data class RunningData (
     val path: List<LatLng>,
-    val runningTime: Int,
-    val runningDist: Double,
+    val time: Double,
+    val dist: Double,
     val avgPace: Double,
     val subDist: List<Double>,
-    val subTime: List<Int>
     ){
 }

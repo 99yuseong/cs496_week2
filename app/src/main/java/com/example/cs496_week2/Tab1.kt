@@ -2,6 +2,7 @@ package com.example.cs496_week2
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.graphics.PointF
 import android.location.Location
 import android.os.Build
@@ -21,11 +22,15 @@ import com.example.cs496_week2.databinding.FragmentTab3Binding
 import com.google.android.gms.location.*
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
+import com.naver.maps.map.overlay.PathOverlay
+import com.naver.maps.map.overlay.PolylineOverlay
 import com.naver.maps.map.util.FusedLocationSource
 import java.util.*
+import java.util.concurrent.locks.ReentrantLock
 import java.util.jar.Manifest
 import kotlin.concurrent.thread
 import kotlin.concurrent.timer
+import kotlin.math.round
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -48,11 +53,27 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     private val REQUEST_PERMISSION_LOCATION = 10
 
     // timer
-    private var time = 0
     private var isRunning = false
     private var timerTask: Timer? = null
-    private var index :Int = 1
-    private lateinit var runningRoute: List<List<Double>>
+    private var time = 0.0
+    private var dist = 0.0
+    private var subDist: Double = 0.0
+    private var avgPace: Double = 0.0
+    lateinit var prvCoord: LatLng
+    private lateinit var path: MutableList<LatLng>
+    private var subDistList: MutableList<Double> = mutableListOf(0.0)
+    val l = ReentrantLock()
+
+    //btns
+    lateinit var startBtn: ImageView
+    lateinit var stopBtn: ImageView
+
+    // running DATA list
+    private var firstRunning: Boolean = true
+    lateinit var runningData: MutableList<RunningData>
+
+    // pathline
+    var pathLine = PolylineOverlay()
 
     // Activity 형변환
     override fun onAttach(context: Context) {
@@ -66,15 +87,16 @@ class Tab1 : Fragment(), OnMapReadyCallback {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+
         binding = FragmentTab1Binding.inflate(layoutInflater)
         // 현재 위치 (네이버지도 좌표)
         locationSource = FusedLocationSource(this, LOCATION_PERMISSTION_REQUEST_CODE)
         // 현재 위치 (GPS 좌표)
         mLocationRequest =  LocationRequest.create().apply {
-            interval = 200
-            fastestInterval = 100
+            interval = 1000
+            fastestInterval = 1000
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            maxWaitTime = 200
+            maxWaitTime = 1000
         }
 //        // 버튼 이벤트를 통해 현재 위치 찾기
 //        button.setOnClickListener {
@@ -83,12 +105,6 @@ class Tab1 : Fragment(), OnMapReadyCallback {
 //            }
 //        }
         startLocationUpdates()
-//        kotlin.concurrent.timer(preoid = 1000) {
-//            runOnUiThread {
-//                // UI 조작 로직
-//            }
-//        }
-
     }
 
     override fun onCreateView(
@@ -98,10 +114,17 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         // Inflate the layout for this fragment
         root = inflater.inflate(R.layout.fragment_tab1, container, false)
 
-        val startBtn: ImageView = root.findViewById(R.id.start)
+        startBtn = root.findViewById(R.id.start)
+        stopBtn = root.findViewById(R.id.stop)
         startBtn.setOnClickListener {
-            start()
-            Log.d("clicked", "clicked")
+            if(isRunning) {
+                pause()
+            } else {
+                start()
+            }
+        }
+        stopBtn.setOnClickListener {
+            reset()
         }
         return root
     }
@@ -119,8 +142,8 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         val uiSettings = naverMap.uiSettings
         naverMap.locationSource = locationSource
         naverMap.locationTrackingMode = LocationTrackingMode.Follow
-//        naverMap.mapType = NaverMap.MapType.Navi
-//        uiSettings.isZoomControlEnabled = false
+        naverMap.mapType = NaverMap.MapType.Navi
+        uiSettings.isZoomControlEnabled = false
         naverMap.isNightModeEnabled = true
     }
 
@@ -181,13 +204,15 @@ class Tab1 : Fragment(), OnMapReadyCallback {
 
     // 시스템으로 부터 받은 위치정보를 화면에 갱신해주는 메소드
     fun onLocationChanged(location: Location) {
-        mLastLocation = location
-        val cameraUpdate = CameraUpdate.scrollTo(LatLng(mLastLocation.latitude, mLastLocation.longitude))
-            .pivot(PointF(0.5f, 0.5f)).animate(CameraAnimation.Fly, 500)
-        naverMap.moveCamera(cameraUpdate)
-//        text2.text = "위도 : " + mLastLocation.latitude // 갱신 된 위도
-//        text1.text = "경도 : " + mLastLocation.longitude // 갱신 된 경도
-//        Log.d("location", "Lat : ${mLastLocation.latitude}, Lon : ${mLastLocation.longitude}")
+        l.lock()
+        try {
+            mLastLocation = location
+            val cameraUpdate = CameraUpdate.scrollTo(LatLng(mLastLocation.latitude, mLastLocation.longitude))
+                .pivot(PointF(0.5f, 0.5f)).animate(CameraAnimation.Fly, 500)
+            naverMap.moveCamera(cameraUpdate)
+        } finally {
+            l.unlock()
+        }
     }
 
     // 위치 권한이 있는지 확인하는 메서드
@@ -221,40 +246,113 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     }
 
     private fun start() {
-        binding.start.setImageResource(R.drawable.ic_round_pause_24)	// 시작버튼을 일시정지 이미지로 변경
-//        val
-//        val runningData = RunningData(listof(LatLng(mLastLocation.latitude,mLastLocation.longitude)), 0, 0.0, 0.0, listof(0.0), listof(0))
+        isRunning = true
+        stopBtn.visibility = View.VISIBLE
+        startBtn.setImageResource(R.drawable.ic_round_pause_24)
 
-        timerTask = kotlin.concurrent.timer(period = 1000) {	// timer() 호출
-            time++	// period=10, 0.01초마다 time를 1씩 증가
-            val sec = time / 100	// time/100, 나눗셈의 몫 (초 부분)
-            val milli = time % 100	// time%100, 나눗셈의 나머지 (밀리초 부분)
+        prvCoord = LatLng(mLastLocation.latitude, mLastLocation.longitude)
+        path = mutableListOf(LatLng(mLastLocation.latitude, mLastLocation.longitude))
 
-//            // UI조작을 위한 메서드
+        timerTask = kotlin.concurrent.timer(period = 500) {	// timer() 호출
+
             mainActivity.runOnUiThread {
-////                secText.text = "$sec"	// TextView 세팅
-////                milliText.text = "$milli"	// Textview 세팅
-//                Log.d("sec", sec.toString())
-//                Log.d("mlili", milli.toString())
                 startLocationUpdates()
-                Log.d("location", "Lat : ${mLastLocation.latitude}, Lon : ${mLastLocation.longitude}")
-//                val cameraUpdate = CameraUpdate.scrollTo(LatLng(mLastLocation.latitude, mLastLocation.longitude))
-//                    .pivot(PointF(0.5f, 0.8f))
-//                naverMap.moveCamera(cameraUpdate)
-                Toast.makeText(mainActivity, "Lat : ${mLastLocation.latitude}, Lon : ${mLastLocation.longitude}", Toast.LENGTH_SHORT).show()
+                l.lock()
+                try {
+                    Toast.makeText(
+                        mainActivity,
+                        "Lat : ${mLastLocation.latitude}, Lon : ${mLastLocation.longitude}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    // 경로 좌표
+                    path.add(LatLng(mLastLocation.latitude, mLastLocation.longitude))
+                    linePath()
+                    // 부분 거리
+                    subDist = calDist(
+                        prvCoord.latitude,
+                        prvCoord.longitude,
+                        mLastLocation.latitude,
+                        mLastLocation.longitude
+                    )
+                    // 총 거리
+                    dist += subDist
+                    // 부분 거리 리스트
+                    subDistList.add(subDist)
+                    // 시간
+                    time++
+                    // 평균 페이스
+                    avgPace = dist / time
+                Log.d("running Data", "path : ${path.toString()}")
+                Log.d("subDist", "subDist : ${subDist}")
+                Log.d("dist", "dist : ${dist}")
+                Log.d("subDistList", "subDistList : ${subDistList.toString()}")
+                Log.d("prevCoord", "prevCoord : ${prvCoord}")
+                Log.d("time", "time: ${time}")
+                } finally {
+                    l.unlock()
+                }
             }
         }
     }
 
     private fun pause() {
-        binding.start.setImageResource(R.drawable.ic_round_play_arrow_24)	// 일시정지 아이콘에서 start아이콘으로 변경
+        isRunning = false
+        stopBtn.visibility = View.GONE
+        startBtn.setImageResource(R.drawable.ic_round_play_arrow_24)
         timerTask?.cancel();	// 안전한 호출(?.)로 timerTask가 null이 아니면 cancel() 호출
     }
 
-//    // 기록버튼 클릭리스너 등록
-//    btn_lab.setOnClickListener {
-//        if(time!=0) lapTime()	// 시간 저장변수 time이 0이라면 함수호출하지 않음
-//    }
+    private fun reset() {
+        isRunning = false
+        stopBtn.visibility = View.GONE
+        startBtn.setImageResource(R.drawable.ic_round_play_arrow_24)
+        timerTask?.cancel()	// timerTask가 null이 아니라면 cancel() 호출
+
+        var curRunningData = RunningData(path, time, dist, avgPace, subDistList)
+
+        if (firstRunning) {
+            firstRunning = false
+            runningData = mutableListOf(curRunningData)
+        } else {
+            runningData.add(curRunningData)
+        }
+        time = 0.0
+        dist = 0.0
+        subDist = 0.0
+        avgPace = 0.0
+        path.clear()
+        subDistList.clear()
+        Log.d("running Data", "path : ${path.toString()}")
+        Log.d("subDist", "subDist : ${subDist}")
+        Log.d("dist", "dist : ${dist}")
+        Log.d("subDistList", "subDistList : ${subDistList.toString()}")
+        Log.d("time", "time: ${time}")
+        Log.d("avgpace", "avgpac : ${avgPace}")
+    }
+
+    private fun calDist(lat1:Double, lon1:Double, lat2:Double, lon2:Double) : Double{
+        val EARTH_R = 6371000.0
+        val rad = Math.PI / 180
+        val radLat1 = rad * lat1
+        val radLat2 = rad * lat2
+        val radDist = rad * (lon1 - lon2)
+
+        var distance = Math.sin(radLat1) * Math.sin(radLat2)
+        distance = distance + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radDist)
+        val ret = EARTH_R * Math.acos(distance)
+
+        return ret // 미터 단위
+    }
+
+    private fun linePath() {
+        pathLine.coords = path
+        pathLine.width = 30
+//        pathLine.outlineWidth = 2
+        pathLine.color = Color.BLUE
+        pathLine.map = naverMap
+        pathLine.joinType = PolylineOverlay.LineJoin.Round
+        pathLine.capType = PolylineOverlay.LineCap.Round
+    }
 
 
     companion object {
