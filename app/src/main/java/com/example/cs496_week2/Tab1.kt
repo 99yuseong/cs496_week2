@@ -63,6 +63,9 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     private lateinit var path: MutableList<LatLng>
     private var subDistList: MutableList<Double> = mutableListOf(0.0)
     val l = ReentrantLock()
+    private var totLat : Double = 0.0
+    private var totLon : Double = 0.0
+    private var runStart: Boolean = true
 
     //btns
     lateinit var startBtn: ImageView
@@ -116,6 +119,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
 
         startBtn = root.findViewById(R.id.start)
         stopBtn = root.findViewById(R.id.stop)
+
         startBtn.setOnClickListener {
             if(isRunning) {
                 pause()
@@ -143,7 +147,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         naverMap.locationSource = locationSource
         naverMap.locationTrackingMode = LocationTrackingMode.Follow
         naverMap.mapType = NaverMap.MapType.Navi
-        uiSettings.isZoomControlEnabled = false
+//        uiSettings.isZoomControlEnabled = false
         naverMap.isNightModeEnabled = true
     }
 
@@ -207,9 +211,11 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         l.lock()
         try {
             mLastLocation = location
-            val cameraUpdate = CameraUpdate.scrollTo(LatLng(mLastLocation.latitude, mLastLocation.longitude))
-                .pivot(PointF(0.5f, 0.5f)).animate(CameraAnimation.Fly, 500)
-            naverMap.moveCamera(cameraUpdate)
+            if(isRunning) {
+                val cameraUpdate = CameraUpdate.scrollTo(LatLng(mLastLocation.latitude, mLastLocation.longitude))
+                    .pivot(PointF(0.5f, 0.5f)).animate(CameraAnimation.Fly, 500)
+                naverMap.moveCamera(cameraUpdate)
+            }
         } finally {
             l.unlock()
         }
@@ -250,11 +256,15 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         stopBtn.visibility = View.VISIBLE
         startBtn.setImageResource(R.drawable.ic_round_pause_24)
 
-        prvCoord = LatLng(mLastLocation.latitude, mLastLocation.longitude)
-        path = mutableListOf(LatLng(mLastLocation.latitude, mLastLocation.longitude))
+        if(runStart){
+            prvCoord = LatLng(mLastLocation.latitude, mLastLocation.longitude)
+            path = mutableListOf(LatLng(mLastLocation.latitude, mLastLocation.longitude))
+            totLat = mLastLocation.latitude
+            totLon = mLastLocation.longitude
+            runStart = false
+        }
 
         timerTask = kotlin.concurrent.timer(period = 500) {	// timer() 호출
-
             mainActivity.runOnUiThread {
                 startLocationUpdates()
                 l.lock()
@@ -266,6 +276,8 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                     ).show()
                     // 경로 좌표
                     path.add(LatLng(mLastLocation.latitude, mLastLocation.longitude))
+                    totLat += mLastLocation.latitude
+                    totLon += mLastLocation.longitude
                     linePath()
                     // 부분 거리
                     subDist = calDist(
@@ -282,6 +294,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                     time++
                     // 평균 페이스
                     avgPace = dist / time
+                    // tot sum
                 Log.d("running Data", "path : ${path.toString()}")
                 Log.d("subDist", "subDist : ${subDist}")
                 Log.d("dist", "dist : ${dist}")
@@ -300,6 +313,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         stopBtn.visibility = View.GONE
         startBtn.setImageResource(R.drawable.ic_round_play_arrow_24)
         timerTask?.cancel();	// 안전한 호출(?.)로 timerTask가 null이 아니면 cancel() 호출
+
     }
 
     private fun reset() {
@@ -308,20 +322,30 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         startBtn.setImageResource(R.drawable.ic_round_play_arrow_24)
         timerTask?.cancel()	// timerTask가 null이 아니라면 cancel() 호출
 
-        var curRunningData = RunningData(path, time, dist, avgPace, subDistList)
-
+        // 데이터 저장
+        val curRunningData = RunningData(path, time, dist, avgPace, subDistList)
         if (firstRunning) {
             firstRunning = false
             runningData = mutableListOf(curRunningData)
         } else {
             runningData.add(curRunningData)
         }
+
+        // 카메라 이동
+        var center = LatLng(totLat / path.size, totLon / path.size)
+        val cameraUpdate = CameraUpdate.scrollTo(LatLng(center.latitude, center.longitude))
+            .pivot(PointF(0.5f, 0.5f)).animate(CameraAnimation.Fly, 500)
+        naverMap.moveCamera(cameraUpdate)
+
         time = 0.0
         dist = 0.0
         subDist = 0.0
         avgPace = 0.0
         path.clear()
         subDistList.clear()
+        totLat = 0.0
+        totLon = 0.0
+        runStart = true
         Log.d("running Data", "path : ${path.toString()}")
         Log.d("subDist", "subDist : ${subDist}")
         Log.d("dist", "dist : ${dist}")
