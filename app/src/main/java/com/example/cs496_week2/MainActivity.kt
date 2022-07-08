@@ -1,6 +1,7 @@
 package com.example.cs496_week2
 
 import android.app.Application
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -12,15 +13,21 @@ import com.example.cs496_week2.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import com.kakao.sdk.common.KakaoSdk
 import com.kakao.sdk.common.util.Utility
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.*
 import io.socket.client.IO
 import io.socket.client.Socket.EVENT_CONNECT
 import io.socket.emitter.Emitter
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.net.Socket
 import java.net.URISyntaxException
 
 class MainActivity : AppCompatActivity() {
+    lateinit var kakaoAccount: KakaoAccount
+    val serverUrl = "http://172.10.5.172:80"
 
     private lateinit var binding: ActivityMainBinding
     lateinit var mSocket: Socket
@@ -28,8 +35,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val keyHash = Utility.getKeyHash(this)//onCreate 안에 입력해주자
-        Log.d("Hash", keyHash)
+        val intent = intent
+        kakaoAccount = intent.getSerializableExtra("kakaoAccount") as KakaoAccount
+        Log.i("KAKAO", kakaoAccount.toString())
+
+//        val keyHash = Utility.getKeyHash(this) //onCreate 안에 입력해주자
+//        Log.d("Hash", keyHash)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -65,6 +76,26 @@ class MainActivity : AppCompatActivity() {
 
             }
         })
+
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverUrl)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val service: RetrofitService = retrofit.create(RetrofitService::class.java)
+
+        service.postRequest(kakaoAccount).enqueue(object : Callback<UserDT> {
+            override fun onResponse(call: Call<UserDT>?, response: Response<UserDT>?) {
+                if(response!!.isSuccessful) {
+                    Log.d("retrofit", response?.body().toString())
+                }
+            }
+
+            override fun onFailure(call: Call<UserDT>?, t: Throwable?) {
+                Log.e("retrofit", t.toString())
+            }
+        })
     }
 
     inner class MyPagerAdapter(fa: FragmentActivity): FragmentStateAdapter(fa) {
@@ -76,9 +107,25 @@ class MainActivity : AppCompatActivity() {
             return when (position) {
                 0 -> { Tab1.newInstance("Page 1","")}
                 1 -> { Tab2.newInstance("Page 2","")}
+                2 -> { Tab3.newInstance("Page 3","")}
                 else -> { Tab3.newInstance("Page 3","")}
             }
         }
+    }
+
+    interface RetrofitService{
+        //post1
+        // 매개변수를 미리 정해두는 방식
+        @GET("/")
+        fun getRequest(
+        ): Call<UserDT>
+
+        //post2
+        // 호출하는 곳에서 매개변수를 HashMap 형태로 보내는 방식
+        @POST("/user")
+        fun postRequest(
+            @Body parameters: KakaoAccount
+        ): Call<UserDT>
 
     }
 }
