@@ -89,6 +89,7 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(call: Call<UserDT>?, response: Response<UserDT>?) {
                 if(response != null && response!!.isSuccessful) {
                     Log.d("retrofit", response?.body().toString())
+//                    user = response?.body()!!
                 }
             }
 

@@ -103,6 +103,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
 
     // friends
     lateinit var user: UserDT
+    lateinit var locationData : LocationDT
 
     // socket
     lateinit var mSocket: Socket
@@ -322,7 +323,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
             totLat = mLastLocation.latitude
             totLon = mLastLocation.longitude
             runStart = false
-            curRunningData = RunningData(path, time, dist, avgPace, subDistList)
+            locationData = LocationDT(MainActivity.kakaoUser.id!!, prvCoord )
             mSocket = SocketApplication.get()
             mSocket.connect()
         }
@@ -340,6 +341,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
 //                            Toast.LENGTH_SHORT
 //                        ).show()
                         path.add(LatLng(mLastLocation.latitude, mLastLocation.longitude))
+                        locationData.latLng = LatLng(mLastLocation.latitude, mLastLocation.longitude)
                         totLat += mLastLocation.latitude
                         totLon += mLastLocation.longitude
                         // 부분 거리
@@ -354,7 +356,6 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                         // 부분 거리 리스트
                         subDistList.add(subDist)
                         // 부분 거리 리스트
-                        subDistList.add(subDist)
                         // 평균 페이스
                         avgPace = time / (dist / 1000.0)
                         linePath()
@@ -365,7 +366,6 @@ class Tab1 : Fragment(), OnMapReadyCallback {
 //                        Log.d("prevCoord", "prevCoord : ${prvCoord}")
 //                        Log.d("time", "time: ${time}")
                         prvCoord = LatLng(mLastLocation.latitude, mLastLocation.longitude)
-                        curRunningData = RunningData(path, time, dist, avgPace, subDistList)
                         min = (time / 60).toInt()
                         sec = (time % 60).toInt()
                         km = dist / 1000
@@ -376,7 +376,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                         paceView.text = "${if(dist < 1) 0 else paceMin}' ${if(paceSec >= 10) paceSec else "0${paceSec}"}''"
 
                         // socket
-                        mSocket.emit("curRunning", prvCoord)
+                        mSocket.emit("curRunning", locationData)
                     }
                     // 시간
                     time += 0.25
@@ -401,7 +401,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         startBtn.setImageResource(R.drawable.ic_round_play_arrow_24)
         timerTask?.cancel()	// timerTask가 null이 아니라면 cancel() 호출
         mSocket.disconnect()
-
+        curRunningData = RunningData(path, time, dist, avgPace, subDistList)
         // 데이터 저장
         if (firstRunning) {
             firstRunning = false

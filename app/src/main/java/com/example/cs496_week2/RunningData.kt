@@ -4,10 +4,12 @@ import com.naver.maps.geometry.LatLng
 import java.security.cert.CertPath
 
 data class RunningData (
-    val path: List<LatLng>,
-    val time: Double,
-    val dist: Double,
-    val avgPace: Double,
-    val subDist: List<Double>,
+    public var path: MutableList<LatLng>,
+    public var time: Double,
+    public var dist: Double,
+    public var avgPace: Double,
+    public var subDist: MutableList<Double>,
     ){
+
 }
+
