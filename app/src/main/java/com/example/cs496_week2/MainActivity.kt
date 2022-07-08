@@ -23,7 +23,6 @@ import io.socket.client.IO
 import io.socket.client.Socket.EVENT_CONNECT
 import io.socket.emitter.Emitter
 import java.net.Socket
-import java.net.URISyntaxException
 
 class MainActivity : AppCompatActivity() {
     lateinit var kakaoAccount: KakaoAccount
@@ -77,22 +76,15 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        val service = RetrofitInterface.service
 
-        val retrofit = Retrofit.Builder()
-            .baseUrl(serverUrl)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val service: RetrofitService = retrofit.create(RetrofitService::class.java)
-
-        service.postRequest(kakaoAccount).enqueue(object : Callback<UserDT> {
+        service.postFirstAccess(kakaoAccount).enqueue(object : Callback<UserDT> {
             override fun onResponse(call: Call<UserDT>?, response: Response<UserDT>?) {
                 if(response != null && response!!.isSuccessful) {
                     Log.d("retrofit", response?.body().toString())
 //                    user = response?.body()!!
                 }
             }
-
             override fun onFailure(call: Call<UserDT>?, t: Throwable?) {
                 Log.e("retrofit", t.toString())
             }
