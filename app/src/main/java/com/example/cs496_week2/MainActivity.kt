@@ -30,7 +30,6 @@ class MainActivity : AppCompatActivity() {
     val serverUrl = "http://172.10.5.172:80"
 
     private lateinit var binding: ActivityMainBinding
-    lateinit var mSocket: Socket
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +37,7 @@ class MainActivity : AppCompatActivity() {
         val intent = intent
         kakaoAccount = intent.getSerializableExtra("kakaoAccount") as KakaoAccount
         Log.i("KAKAO", kakaoAccount.toString())
+        kakaoUser = kakaoAccount
 
 //        val keyHash = Utility.getKeyHash(this) //onCreate 안에 입력해주자
 //        Log.d("Hash", keyHash)
@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
 
         service.postRequest(kakaoAccount).enqueue(object : Callback<UserDT> {
             override fun onResponse(call: Call<UserDT>?, response: Response<UserDT>?) {
-                if(response!!.isSuccessful) {
+                if(response != null && response!!.isSuccessful) {
                     Log.d("retrofit", response?.body().toString())
                 }
             }
@@ -127,5 +127,10 @@ class MainActivity : AppCompatActivity() {
             @Body parameters: KakaoAccount
         ): Call<UserDT>
 
+    }
+
+    companion object {
+        lateinit var kakaoUser : KakaoAccount
+        lateinit var user : UserDT
     }
 }

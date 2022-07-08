@@ -22,8 +22,8 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-        val keyHash = Utility.getKeyHash(this)//onCreate 안에 입력해주자
-        Log.d("Hash", keyHash)
+//        val keyHash = Utility.getKeyHash(this)//onCreate 안에 입력해주자
+//        Log.d("Hash", keyHash)
         // 로그인 정보 확인
 
         val intent = Intent(this, MainActivity::class.java)

@@ -1,17 +1,19 @@
 package com.example.cs496_week2
 
+import com.naver.maps.geometry.LatLng
 import java.util.*
 import kotlin.collections.ArrayList
 
 data class UserDT (
     val id: Long,
     val name: String,
-    val friend: ArrayList<Long>,
-    val group: ArrayList<Long>,
+    val imgUrl: String,
+    val friend: ArrayList<UserDT>,
+    val group: ArrayList<ArrayList<UserDT>>,
     val running: ArrayList<RunningDT>
 )
 
 data class RunningDT (
-    val date: Date,
-    val coordinate: ArrayList<Pair<Double, Double>>
+    val date: ArrayList<Date>,
+    val coordinate: ArrayList<LatLng>
 )
