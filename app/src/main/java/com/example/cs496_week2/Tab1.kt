@@ -24,6 +24,7 @@ import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import com.example.cs496_week2.databinding.FragmentTab1Binding
 import com.google.android.gms.location.*
+import com.google.gson.Gson
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
 import com.naver.maps.map.overlay.LocationOverlay
@@ -32,13 +33,16 @@ import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PolylineOverlay
 import com.naver.maps.map.util.FusedLocationSource
 import io.socket.client.Socket
+import io.socket.emitter.Emitter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import java.io.IOException
 import java.net.MalformedURLException
 import java.net.URL
+import java.sql.Struct
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 
@@ -104,6 +108,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     // friends
     lateinit var user: UserDT
     lateinit var locationData : LocationDT
+    var runningFriends : MutableList<LocationDT> = mutableListOf()
 
     // socket
     lateinit var mSocket: Socket
@@ -323,9 +328,31 @@ class Tab1 : Fragment(), OnMapReadyCallback {
             totLat = mLastLocation.latitude
             totLon = mLastLocation.longitude
             runStart = false
-            locationData = LocationDT(MainActivity.kakaoUser.id!!, prvCoord )
+            locationData = LocationDT(MainActivity.kakaoUser.id!!, prvCoord.latitude, prvCoord.longitude, "imgUrl", "name" )
             mSocket = SocketApplication.get()
             mSocket.connect()
+            mSocket.on("message", Emitter.Listener {
+                var jObject = JSONObject(it[0].toString())
+                var id = jObject.getString("id")
+                var lat = jObject.getString("lat")
+                var lon = jObject.getString("lon")
+                var name = jObject.getString("name")
+                var imgUrl = jObject.getString("imgUrl")
+                var inFriendList = false
+
+                if (runningFriends.size == 0) {
+                    runningFriends.add(LocationDT(id.toLong(), lat.toDouble(), lon.toDouble(), imgUrl, name))
+                } else {
+                    for (i in 0..runningFriends.size-1) {
+                        if(id.toLong() == runningFriends[i].id) {
+                            inFriendList = true
+                        }
+                    }
+                    if(!inFriendList && id.toLong() == MainActivity.kakaoUser.id) {
+                        runningFriends.add(LocationDT(id.toLong(), lat.toDouble(), lon.toDouble(), imgUrl, name))
+                    }
+                }
+            })
         }
 
         timerTask = kotlin.concurrent.timer(period = 250) {	// timer() 호출
@@ -341,7 +368,8 @@ class Tab1 : Fragment(), OnMapReadyCallback {
 //                            Toast.LENGTH_SHORT
 //                        ).show()
                         path.add(LatLng(mLastLocation.latitude, mLastLocation.longitude))
-                        locationData.latLng = LatLng(mLastLocation.latitude, mLastLocation.longitude)
+                        locationData.lat = mLastLocation.latitude
+                        locationData.lon = mLastLocation.longitude
                         totLat += mLastLocation.latitude
                         totLon += mLastLocation.longitude
                         // 부분 거리
@@ -375,8 +403,14 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                         kmView.text = "${String.format("%.2f", km)} km"
                         paceView.text = "${if(dist < 1) 0 else paceMin}' ${if(paceSec >= 10) paceSec else "0${paceSec}"}''"
 
-                        // socket
-                        mSocket.emit("curRunning", locationData)
+                        // draw friends
+                        if(runningFriends.size != 0) {
+                            for(i in 0..runningFriends.size-1){
+                                friendMarker(i)
+                            }
+                        }
+                            // socket
+                        mSocket.emit("curRunning", Gson().toJson(locationData))
                     }
                     // 시간
                     time += 0.25
@@ -459,11 +493,24 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         pathLine.capType = PolylineOverlay.LineCap.Round
     }
 
-    private fun friendMarker(){
-
+    private fun friendMarker(idx: Int){
+        var friendMarker = Marker()
+        var imageUrl = runningFriends[idx].imgUrl
+        CoroutineScope(Dispatchers.Main).launch {
+            val bitmap = withContext(Dispatchers.IO) {
+                ImageLoader.loadImage(imageUrl)
+            }
+            friendMarker.position = LatLng(runningFriends[idx].lat, runningFriends[idx].lon)
+            friendMarker.map = naverMap
+//            friendMarker.icon = OverlayImage.fromBitmap(bitmap!!)
+            friendMarker.captionText = runningFriends[idx].name
+//            friendMarker.zIndex = 100
+        }
     }
 
-
+    private fun markFriends(){
+        var friendMarker = Marker()
+    }
 
     companion object {
         @JvmStatic

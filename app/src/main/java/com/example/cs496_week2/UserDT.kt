@@ -21,5 +21,8 @@ data class RunningDT (
 
 data class LocationDT (
     var id: Long,
-    var latLng: LatLng,
+    var lat: Double,
+    var lon: Double,
+    var imgUrl: String,
+    var name: String
 )
