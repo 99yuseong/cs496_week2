@@ -76,8 +76,7 @@ class MainActivity : AppCompatActivity() {
             return when (position) {
                 0 -> { Tab1.newInstance("Page 1","")}
                 1 -> { Tab2.newInstance("Page 2","")}
-                2 -> { Tab3.newInstance("Page 3","")}
-                else -> { Tab4.newInstance("Page 4","")}
+                else -> { Tab3.newInstance("Page 3","")}
             }
         }
 

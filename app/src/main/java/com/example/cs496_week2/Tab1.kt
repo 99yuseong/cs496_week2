@@ -1,5 +1,6 @@
 package com.example.cs496_week2
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -14,22 +15,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import com.example.cs496_week2.databinding.FragmentTab1Binding
-import com.example.cs496_week2.databinding.FragmentTab3Binding
 import com.google.android.gms.location.*
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
-import com.naver.maps.map.overlay.PathOverlay
+import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PolylineOverlay
 import com.naver.maps.map.util.FusedLocationSource
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
-import java.util.jar.Manifest
-import kotlin.concurrent.thread
-import kotlin.concurrent.timer
 import kotlin.math.round
 
 private const val ARG_PARAM1 = "param1"
@@ -78,6 +77,17 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     // pathline
     var pathLine = PolylineOverlay()
 
+    // interface
+    lateinit var timeView : TextView
+    lateinit var kmView : TextView
+    lateinit var paceView : TextView
+    lateinit var infoLayout : LinearLayout
+    var min = 0
+    var sec = 0
+    var km = 0.0
+    var paceMin = 0
+    var paceSec = 0
+
     // Activity 형변환
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -117,6 +127,11 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         // Inflate the layout for this fragment
         root = inflater.inflate(R.layout.fragment_tab1, container, false)
 
+        timeView = root.findViewById(R.id.time)
+        kmView = root.findViewById(R.id.kilometer)
+        paceView = root.findViewById(R.id.pace)
+        infoLayout = root.findViewById(R.id.runningInfo)
+
         startBtn = root.findViewById(R.id.start)
         stopBtn = root.findViewById(R.id.stop)
 
@@ -125,10 +140,26 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                 pause()
             } else {
                 start()
+                infoLayout.layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT
+                )
+                mapView.layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    700
+                )
             }
         }
         stopBtn.setOnClickListener {
             reset()
+            infoLayout.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                0
+            )
+            mapView.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
         }
         return root
     }
@@ -145,6 +176,10 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         this.naverMap = naverMap
         val uiSettings = naverMap.uiSettings
         naverMap.locationSource = locationSource
+        val locationOverlay = naverMap.locationOverlay
+        locationOverlay.isVisible = true
+        locationOverlay.circleColor = Color.WHITE
+        locationOverlay.icon = OverlayImage.fromResource(R.drawable.ic_round_directions_run_24)
         naverMap.locationTrackingMode = LocationTrackingMode.Follow
         naverMap.mapType = NaverMap.MapType.Navi
 //        uiSettings.isZoomControlEnabled = false
@@ -251,6 +286,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun start() {
         isRunning = true
         stopBtn.visibility = View.VISIBLE
@@ -264,7 +300,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
             runStart = false
         }
 
-        timerTask = kotlin.concurrent.timer(period = 500) {	// timer() 호출
+        timerTask = kotlin.concurrent.timer(period = 1000) {	// timer() 호출
             mainActivity.runOnUiThread {
                 startLocationUpdates()
                 l.lock()
@@ -285,7 +321,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                         prvCoord.longitude,
                         mLastLocation.latitude,
                         mLastLocation.longitude
-                    )
+                    ).toDouble()
                     // 총 거리
                     dist += subDist
                     // 부분 거리 리스트
@@ -293,14 +329,23 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                     // 시간
                     time++
                     // 평균 페이스
-                    avgPace = dist / time
+                    avgPace = time / (dist / 1000)
                     // tot sum
-                Log.d("running Data", "path : ${path.toString()}")
-                Log.d("subDist", "subDist : ${subDist}")
-                Log.d("dist", "dist : ${dist}")
-                Log.d("subDistList", "subDistList : ${subDistList.toString()}")
-                Log.d("prevCoord", "prevCoord : ${prvCoord}")
-                Log.d("time", "time: ${time}")
+                    Log.d("running Data", "path : ${path.toString()}")
+                    Log.d("subDist", "subDist : ${subDist}")
+                    Log.d("dist", "dist : ${dist}")
+                    Log.d("subDistList", "subDistList : ${subDistList.toString()}")
+                    Log.d("prevCoord", "prevCoord : ${prvCoord}")
+                    Log.d("time", "time: ${time}")
+                    prvCoord = LatLng(mLastLocation.latitude, mLastLocation.longitude)
+                    min = (time / 60).toInt()
+                    sec = (time % 60).toInt()
+                    km = dist / 1000
+                    paceMin = (avgPace / 60).toInt()
+                    paceSec = (avgPace % 60).toInt()
+                    timeView.text = "${if(min >= 10) min else "0${min}"}:${if(sec >= 10) sec else "0${sec}"}"
+                    kmView.text = "${String.format("%.2f", km)} km"
+                    paceView.text = "${if(time < 3) 0 else paceMin}' ${if(paceSec >= 10) paceSec else "0${paceSec}"}''"
                 } finally {
                     l.unlock()
                 }
@@ -354,8 +399,8 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         Log.d("avgpace", "avgpac : ${avgPace}")
     }
 
-    private fun calDist(lat1:Double, lon1:Double, lat2:Double, lon2:Double) : Double{
-        val EARTH_R = 6371000.0
+    private fun calDist(lat1:Double, lon1:Double, lat2:Double, lon2:Double) : Long {
+        val EARTH_R = 6372800.0
         val rad = Math.PI / 180
         val radLat1 = rad * lat1
         val radLat2 = rad * lat2
@@ -365,8 +410,9 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         distance = distance + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radDist)
         val ret = EARTH_R * Math.acos(distance)
 
-        return ret // 미터 단위
+        return Math.round(ret) // 미터 단위
     }
+
 
     private fun linePath() {
         pathLine.coords = path
