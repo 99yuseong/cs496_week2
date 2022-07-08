@@ -2,9 +2,11 @@ package com.example.cs496_week2
 
 import android.content.Intent.getIntent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.fragment.app.Fragment
 import io.socket.client.Socket
 import java.net.URISyntaxException
@@ -26,6 +28,8 @@ class Tab2 : Fragment() {
     private var param2: String? = null
     lateinit var mSocket: Socket
 
+    lateinit var root :View
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -39,15 +43,23 @@ class Tab2 : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_tab2, container, false)
+        root = inflater.inflate(R.layout.fragment_tab2, container, false)
+        return root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mSocket = SocketApplication.get()
-        mSocket.connect()
-        mSocket.emit("message", "hello")
+        val addFriendBtn : View = root.findViewById(R.id.add_friend)
+
+        addFriendBtn.setOnClickListener { view ->
+            val popup = AddFriendPopup(view.context)
+            popup.showDialog()
+        }
+
+//        mSocket = SocketApplication.get()
+//        mSocket.connect()
+//        mSocket.emit("message", "hello")
     }
 
     companion object {
