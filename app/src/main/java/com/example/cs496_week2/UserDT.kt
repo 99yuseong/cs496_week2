@@ -11,12 +11,7 @@ data class UserDT (
     val imgUrl: String,
     val friends: ArrayList<UserDT>,
     val group: ArrayList<ArrayList<UserDT>>,
-    val running: ArrayList<RunningDT>
-)
-
-data class RunningDT (
-    val date: ArrayList<Date>,
-    val coordinate: ArrayList<LatLng>
+    val running: ArrayList<RunningData>
 )
 
 data class LocationDT (
@@ -26,3 +21,14 @@ data class LocationDT (
     var imgUrl: String,
     var name: String
 )
+
+data class RunningData (
+    val date: Date,
+    var path: MutableList<LatLng>,
+    var time: Double,
+    var dist: Double,
+    var avgPace: Double,
+    var subDist: MutableList<Double>,
+){
+
+}
