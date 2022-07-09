@@ -44,5 +44,11 @@ class RetrofitInterface {
             @Query("invite") invite: String
         ): String
 
+        @GET("/running/get_data")
+        fun getRunningData(
+            @Query("id") id : String
+        ) : Call<ArrayList<RunningData>>
+
+
     }
 }

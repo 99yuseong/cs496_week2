@@ -429,9 +429,13 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         timerTask?.cancel()	// timerTask가 null이 아니라면 cancel() 호출
         mSocket.disconnect()
         endDate = Date(System.currentTimeMillis())
-        curRunningData = RunningData(startDate, endDate, path, time, dist, avgPace, subDistList)
+        var pathTmp : MutableList<LatLng> = mutableListOf()
+        var subDistListTmp : MutableList<Double> = mutableListOf()
+        pathTmp.addAll(path)
+        subDistListTmp.addAll(subDistList)
+        curRunningData = RunningData(startDate, endDate, pathTmp, time, dist, avgPace, subDistListTmp)
         // 데이터 저장
-        MainActivity.user.running.add(curRunningData)
+//        MainActivity.runningData.add(curRunningData)
 
         // 카메라 이동
         var center = LatLng(totLat / path.size, totLon / path.size)

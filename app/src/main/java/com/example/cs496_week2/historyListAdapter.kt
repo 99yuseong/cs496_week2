@@ -1,6 +1,7 @@
 package com.example.cs496_week2
 
 import android.annotation.SuppressLint
+import android.location.Geocoder
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,7 +13,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.Date
 
-class historyListAdapter(private val histories: MutableList<RunningData>) : BaseAdapter(){
+class historyListAdapter(private val histories: MutableList<RunningData>, private val geocoder: Geocoder) : BaseAdapter(){
+
+    var city : String = ""
 
     override fun getCount(): Int = histories.size
 
@@ -40,6 +43,11 @@ class historyListAdapter(private val histories: MutableList<RunningData>) : Base
         val paceMin = (history.avgPace / 60).toInt()
         val paceSec = (history.avgPace % 60).toInt()
 
+        if (location != null) {
+            location.setText(getLocaionName(position))
+            Log.d("user", MainActivity.user.running.toString())
+        }
+
         if (date != null) {
             date.setText(dateFormatter.format(history.startDate))
         }
@@ -57,5 +65,16 @@ class historyListAdapter(private val histories: MutableList<RunningData>) : Base
         }
 
         return convertView
+    }
+
+    fun getLocaionName(position: Int) : String{
+        Log.d("lat", histories[position].toString())
+        Log.d("lat", histories[position].path[0].toString())
+        Log.d("lat", histories[position].path[0].latitude.toString())
+        var cityList = geocoder.getFromLocation(histories[position].path[0].latitude, histories[position].path[0].longitude,10)
+        if(cityList != null) {
+            city = cityList.get(0).adminArea
+        }
+        return city
     }
 }

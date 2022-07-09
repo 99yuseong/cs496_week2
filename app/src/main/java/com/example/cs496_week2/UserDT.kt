@@ -11,7 +11,7 @@ data class UserDT (
     val imgUrl: String,
     val friends: ArrayList<String>,
     val group: ArrayList<ArrayList<UserDT>>,
-    val running: ArrayList<RunningData>
+    val running: ArrayList<String>
 )
 
 data class LocationDT (
