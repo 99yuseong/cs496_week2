@@ -9,7 +9,7 @@ data class UserDT (
     val id: Long,
     val name: String,
     val imgUrl: String,
-    val friends: ArrayList<UserDT>,
+    val friends: ArrayList<String>,
     val group: ArrayList<ArrayList<UserDT>>,
     val running: ArrayList<RunningData>
 )
@@ -23,7 +23,7 @@ data class LocationDT (
 )
 
 data class RunningData (
-    val date: Date,
+    val date: MutableList<Date>,
     var path: MutableList<LatLng>,
     var time: Double,
     var dist: Double,

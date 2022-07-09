@@ -3,16 +3,20 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_round_directions_run_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_round_pause_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_round_play_arrow_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_round_stop_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/round.xml" value="0.1" />
         <entry key="app/src/main/res/layout-w1240dp/activity_login.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.45892333984375" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
-        <entry key="app/src/main/res/layout/add_friend_popup.xml" value="0.18709564208984375" />
-        <entry key="app/src/main/res/layout/fragment_my.xml" value="0.12943262411347517" />
-        <entry key="app/src/main/res/layout/fragment_tab1.xml" value="0.16757246376811594" />
-        <entry key="app/src/main/res/layout/fragment_tab2.xml" value="0.2546539306640625" />
+        <entry key="app/src/main/res/layout/fragment_tab1.xml" value="0.1596009975062344" />
         <entry key="app/src/main/res/layout/fragment_tab3.xml" value="0.24864130434782608" />
-        <entry key="app/src/main/res/layout/fragment_tab4.xml" value="0.4165215533712636" />
-        <entry key="app/src/main/res/layout/user_item.xml" value="0.3015258346778759" />
+        <entry key="app/src/main/res/layout/fragment_tab4.xml" value="0.318267822265625" />
+        <entry key="app/src/main/res/layout/history_item.xml" value="0.33177083333333335" />
       </map>
     </option>
   </component>

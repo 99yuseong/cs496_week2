@@ -14,8 +14,7 @@
         <com.naver.maps.map.MapView
             android:id="@+id/map"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
-        </com.naver.maps.map.MapView>
+            android:layout_height="match_parent"></com.naver.maps.map.MapView>
 
         <LinearLayout
             android:id="@+id/runningInfo"
@@ -52,26 +51,34 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="bottom"
+        android:layout_gravity="bottom"
+        android:gravity="center_horizontal"
         android:padding="40dp">
 
-        <ImageView
-            android:id="@+id/start"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:src="@drawable/ic_round_play_arrow_24" />
+            <ImageView
+                android:id="@+id/start"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/round"
+                android:src="@drawable/ic_round_play_arrow_24" />
 
-        <ImageView
-            android:id="@+id/stop"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:src="@drawable/ic_round_stop_24"
-            android:visibility="gone"/>
+            <ImageView
+                android:id="@+id/stop"
+                android:background="@drawable/round"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/ic_round_stop_24"
+                android:visibility="gone"/>
     </LinearLayout>
 </FrameLayout>

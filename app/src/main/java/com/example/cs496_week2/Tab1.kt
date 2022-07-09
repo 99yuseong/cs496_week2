@@ -56,19 +56,21 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     private lateinit var binding: FragmentTab1Binding
     private lateinit var root: View
     private lateinit var mainActivity: MainActivity
+
     private lateinit var mapView: MapView
-    private val LOCATION_PERMISSTION_REQUEST_CODE: Int = 1000
+
     private lateinit var locationSource: FusedLocationSource // 위치를 반환하는 구현체
     private lateinit var naverMap: NaverMap
-
     private var mFusedLocationProviderClient: FusedLocationProviderClient? = null // 현재 위치를 가져오기 위한 변수
     lateinit var mLastLocation: Location // 위치 값을 가지고 있는 객체
     internal lateinit var mLocationRequest: LocationRequest // 위치 정보 요청의 매개변수를 저장하는
     private val REQUEST_PERMISSION_LOCATION = 10
+    private val LOCATION_PERMISSTION_REQUEST_CODE: Int = 1000
 
     // timer
     private var isRunning = false
     private var timerTask: Timer? = null
+    private var date: MutableList<Date> = mutableListOf()
     private var time = 0.0
     private var dist = 0.0
     private var subDist: Double = 0.0
@@ -87,7 +89,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
 
     // running DATA list
     private var firstRunning: Boolean = true
-    lateinit var runningData: MutableList<RunningData>
+//    lateinit var runningData: MutableList<RunningData>
 
     // pathline
     var pathLine = PolylineOverlay()
@@ -102,7 +104,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     var km = 0.0
     var paceMin = 0
     var paceSec = 0
-    lateinit var locationOverlay : LocationOverlay
+//    lateinit var locationOverlay : LocationOverlay
     private val marker = Marker()
 
     // friends
@@ -139,6 +141,8 @@ class Tab1 : Fragment(), OnMapReadyCallback {
             maxWaitTime = 1000
         }
         startLocationUpdates()
+        mSocket = SocketApplication.get()
+        mSocket.connect()
     }
 
     override fun onCreateView(
@@ -157,9 +161,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         stopBtn = root.findViewById(R.id.stop)
 
         startBtn.setOnClickListener {
-            if(isRunning) {
-                pause()
-            } else {
+            if(!isRunning) {
                 start()
                 infoLayout.layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
@@ -169,6 +171,8 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     700
                 )
+            } else {
+                pause()
             }
         }
         stopBtn.setOnClickListener {
@@ -197,21 +201,21 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         this.naverMap = naverMap
         val uiSettings = naverMap.uiSettings
         naverMap.locationSource = locationSource
-        locationOverlay = naverMap.locationOverlay
+//        locationOverlay = naverMap.locationOverlay
         naverMap.locationTrackingMode = LocationTrackingMode.Follow
         naverMap.mapType = NaverMap.MapType.Navi
 //        uiSettings.isZoomControlEnabled = false
 //        naverMap.isNightModeEnabled = true
 
-        var imageUrl = MainActivity.kakaoUser.profileUrl
-        CoroutineScope(Dispatchers.Main).launch {
-            val bitmap = withContext(Dispatchers.IO) {
-                ImageLoader.loadImage(imageUrl!!)
-            }
-            marker.icon = OverlayImage.fromBitmap(bitmap!!)
-            marker.captionText = MainActivity.kakaoUser.nickname!!
-            marker.zIndex = 100
-        }
+//        var imageUrl = MainActivity.kakaoUser.profileUrl
+//        CoroutineScope(Dispatchers.Main).launch {
+//            val bitmap = withContext(Dispatchers.IO) {
+//                ImageLoader.loadImage(imageUrl!!)
+//            }
+//            marker.icon = OverlayImage.fromBitmap(bitmap!!)
+//            marker.captionText = MainActivity.kakaoUser.nickname!!
+//            marker.zIndex = 100
+//        }
     }
 
     override fun onStart() {
@@ -278,29 +282,29 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                 val cameraUpdate = CameraUpdate.scrollTo(LatLng(mLastLocation.latitude, mLastLocation.longitude))
                     .pivot(PointF(0.5f, 0.5f)).animate(CameraAnimation.Easing, 500)
                 naverMap.moveCamera(cameraUpdate)
-                marker.position = LatLng(mLastLocation.latitude, mLastLocation.longitude)
-                marker.map = naverMap
+//                marker.position = LatLng(mLastLocation.latitude, mLastLocation.longitude)
+//                marker.map = naverMap
             }
         } finally {
             l.unlock()
         }
     }
 
-    // 위치 권한이 있는지 확인하는 메서드
-    private fun checkPermissionForLocation(context: Context): Boolean {
-        // Android 6.0 Marshmallow 이상에서는 위치 권한에 추가 런타임 권한이 필요
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                true
-            } else {
-                // 권한이 없으므로 권한 요청 알림 보내기
-                ActivityCompat.requestPermissions(mainActivity, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_PERMISSION_LOCATION)
-                false
-            }
-        } else {
-            true
-        }
-    }
+//    // 위치 권한이 있는지 확인하는 메서드
+//    private fun checkPermissionForLocation(context: Context): Boolean {
+//        // Android 6.0 Marshmallow 이상에서는 위치 권한에 추가 런타임 권한이 필요
+//        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            if (context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+//                true
+//            } else {
+//                // 권한이 없으므로 권한 요청 알림 보내기
+//                ActivityCompat.requestPermissions(mainActivity, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_PERMISSION_LOCATION)
+//                false
+//            }
+//        } else {
+//            true
+//        }
+//    }
 
     // 사용자에게 권한 요청 후 결과에 대한 처리 로직
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -327,10 +331,9 @@ class Tab1 : Fragment(), OnMapReadyCallback {
             path = mutableListOf(LatLng(mLastLocation.latitude, mLastLocation.longitude))
             totLat = mLastLocation.latitude
             totLon = mLastLocation.longitude
+            date.add(Date(System.currentTimeMillis()))
             runStart = false
             locationData = LocationDT(MainActivity.kakaoUser.id!!, prvCoord.latitude, prvCoord.longitude, "imgUrl", "name" )
-            mSocket = SocketApplication.get()
-            mSocket.connect()
             mSocket.on("message", Emitter.Listener {
                 var jObject = JSONObject(it[0].toString())
                 var id = jObject.getString("id")
@@ -340,7 +343,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                 var imgUrl = jObject.getString("imgUrl")
                 var inFriendList = false
 
-                if (runningFriends.size == 0) {
+                if (runningFriends.size == 0 && id.toLong() != MainActivity.kakaoUser.id) {
                     runningFriends.add(LocationDT(id.toLong(), lat.toDouble(), lon.toDouble(), imgUrl, name))
                 } else {
                     for (i in 0..runningFriends.size-1) {
@@ -348,7 +351,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                             inFriendList = true
                         }
                     }
-                    if(!inFriendList && id.toLong() == MainActivity.kakaoUser.id) {
+                    if(!inFriendList && id.toLong() != MainActivity.kakaoUser.id) {
                         runningFriends.add(LocationDT(id.toLong(), lat.toDouble(), lon.toDouble(), imgUrl, name))
                     }
                 }
@@ -362,11 +365,6 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                     // 경로 좌표
                     if ( (time * 100) % 100 == 0.0 ){
                         startLocationUpdates()
-//                        Toast.makeText(
-//                            mainActivity,
-//                            "Lat : ${mLastLocation.latitude}, Lon : ${mLastLocation.longitude}",
-//                            Toast.LENGTH_SHORT
-//                        ).show()
                         path.add(LatLng(mLastLocation.latitude, mLastLocation.longitude))
                         locationData.lat = mLastLocation.latitude
                         locationData.lon = mLastLocation.longitude
@@ -435,15 +433,10 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         startBtn.setImageResource(R.drawable.ic_round_play_arrow_24)
         timerTask?.cancel()	// timerTask가 null이 아니라면 cancel() 호출
         mSocket.disconnect()
-        curRunningData = RunningData(path, time, dist, avgPace, subDistList)
+        date.add(Date(System.currentTimeMillis()))
+        curRunningData = RunningData(date, path, time, dist, avgPace, subDistList)
         // 데이터 저장
-        if (firstRunning) {
-            firstRunning = false
-            runningData = mutableListOf(curRunningData)
-        } else {
-            runningData.add(curRunningData)
-        }
-
+        MainActivity.user.running.add(curRunningData)
 
         // 카메라 이동
         var center = LatLng(totLat / path.size, totLon / path.size)
@@ -482,7 +475,6 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         return ret // 미터 단위
     }
 
-
     private fun linePath() {
         pathLine.coords = path
         pathLine.width = 30
@@ -502,14 +494,10 @@ class Tab1 : Fragment(), OnMapReadyCallback {
             }
             friendMarker.position = LatLng(runningFriends[idx].lat, runningFriends[idx].lon)
             friendMarker.map = naverMap
-//            friendMarker.icon = OverlayImage.fromBitmap(bitmap!!)
+            friendMarker.icon = OverlayImage.fromBitmap(bitmap!!)
             friendMarker.captionText = runningFriends[idx].name
 //            friendMarker.zIndex = 100
         }
-    }
-
-    private fun markFriends(){
-        var friendMarker = Marker()
     }
 
     companion object {

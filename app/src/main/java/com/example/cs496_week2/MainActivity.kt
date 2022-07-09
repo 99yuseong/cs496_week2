@@ -71,6 +71,9 @@ class MainActivity : AppCompatActivity() {
                     2-> {
                         binding.viewpager.isUserInputEnabled = true;
                     }
+                    3-> {
+                        binding.viewpager.isUserInputEnabled = true;
+                    }
                 }
 
             }
@@ -82,7 +85,7 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(call: Call<UserDT>?, response: Response<UserDT>?) {
                 if(response != null && response!!.isSuccessful) {
                     Log.d("retrofit", response?.body().toString())
-//                    user = response?.body()!!
+                    user = response?.body()!!
                 }
             }
             override fun onFailure(call: Call<UserDT>?, t: Throwable?) {
@@ -92,7 +95,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     inner class MyPagerAdapter(fa: FragmentActivity): FragmentStateAdapter(fa) {
-        private val NUM_PAGES = 3
+        private val NUM_PAGES = 4
 
         override fun getItemCount(): Int = NUM_PAGES
 
@@ -101,7 +104,7 @@ class MainActivity : AppCompatActivity() {
                 0 -> { Tab1.newInstance("Page 1","")}
                 1 -> { Tab2.newInstance("Page 2","")}
                 2 -> { Tab3.newInstance("Page 3","")}
-                else -> { Tab3.newInstance("Page 3","")}
+                else -> { Tab4.newInstance("Page 4","")}
             }
         }
     }
