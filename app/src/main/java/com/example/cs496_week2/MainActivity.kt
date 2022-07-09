@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import com.example.cs496_week2.RetrofitInterface.Companion.service
 import com.example.cs496_week2.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import com.kakao.sdk.common.KakaoSdk
@@ -79,13 +80,11 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        val service = RetrofitInterface.service
-
         service.postFirstAccess(kakaoAccount).enqueue(object : Callback<UserDT> {
             override fun onResponse(call: Call<UserDT>?, response: Response<UserDT>?) {
                 if(response != null && response!!.isSuccessful) {
-                    Log.d("retrofit", response?.body().toString())
                     user = response?.body()!!
+                    Log.d("UserDT", MainActivity.user.toString())
                 }
             }
             override fun onFailure(call: Call<UserDT>?, t: Throwable?) {
@@ -107,22 +106,6 @@ class MainActivity : AppCompatActivity() {
                 else -> { Tab4.newInstance("Page 4","")}
             }
         }
-    }
-
-    interface RetrofitService{
-        //post1
-        // 매개변수를 미리 정해두는 방식
-        @GET("/")
-        fun getRequest(
-        ): Call<UserDT>
-
-        //post2
-        // 호출하는 곳에서 매개변수를 HashMap 형태로 보내는 방식
-        @POST("/user")
-        fun postRequest(
-            @Body parameters: KakaoAccount
-        ): Call<UserDT>
-
     }
 
     companion object {

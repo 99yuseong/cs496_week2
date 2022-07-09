@@ -46,7 +46,7 @@ class AddFriendPopup(context: Context) {
             override fun onQueryTextSubmit(p0: String): Boolean {
                 Log.i("SEARCH", p0)
                 searchResult.clear()
-                service.getSearchName(p0).enqueue(object : Callback<ArrayList<UserDT>> {
+                service.getSearchName(MainActivity.user.id, p0).enqueue(object : Callback<ArrayList<UserDT>> {
                     override fun onResponse(call: Call<ArrayList<UserDT>>?, response: Response<ArrayList<UserDT>>?) {
                         if(response!!.isSuccessful) {
                             Log.d("retrofit", response?.body().toString())

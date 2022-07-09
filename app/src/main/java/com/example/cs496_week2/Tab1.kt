@@ -32,6 +32,7 @@ import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PolylineOverlay
 import com.naver.maps.map.util.FusedLocationSource
+import io.socket.client.Manager
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +40,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.IOException
 import java.net.MalformedURLException
 import java.net.URL
@@ -117,6 +121,9 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     // data
     lateinit var curRunningData: RunningData
 
+    // retrofit service
+    val service = RetrofitInterface.service
+
     // Activity 형변환
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -125,6 +132,9 @@ class Tab1 : Fragment(), OnMapReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        mSocket = SocketApplication.get()
+
         arguments?.let {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
@@ -140,8 +150,6 @@ class Tab1 : Fragment(), OnMapReadyCallback {
             maxWaitTime = 1000
         }
         startLocationUpdates()
-        mSocket = SocketApplication.get()
-        mSocket.connect()
     }
 
     override fun onCreateView(
@@ -215,6 +223,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
 //            marker.captionText = MainActivity.kakaoUser.nickname!!
 //            marker.zIndex = 100
 //        }
+
     }
 
     override fun onStart() {
@@ -224,11 +233,13 @@ class Tab1 : Fragment(), OnMapReadyCallback {
 
     override fun onResume() {
         super.onResume()
+        mSocket.connect()
         mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
+        mSocket.disconnect()
         mapView.onPause()
     }
     override fun onSaveInstanceState(outState: Bundle) {
@@ -427,15 +438,26 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         stopBtn.visibility = View.GONE
         startBtn.setImageResource(R.drawable.ic_round_play_arrow_24)
         timerTask?.cancel()	// timerTask가 null이 아니라면 cancel() 호출
-        mSocket.disconnect()
+
         endDate = Date(System.currentTimeMillis())
         var pathTmp : MutableList<LatLng> = mutableListOf()
         var subDistListTmp : MutableList<Double> = mutableListOf()
         pathTmp.addAll(path)
         subDistListTmp.addAll(subDistList)
-        curRunningData = RunningData(startDate, endDate, pathTmp, time, dist, avgPace, subDistListTmp)
-        // 데이터 저장
-//        MainActivity.runningData.add(curRunningData)
+        curRunningData = RunningData(MainActivity.user._id, startDate, endDate, pathTmp, time, dist, avgPace, subDistListTmp)
+
+        Log.d("teeeeeest", "hihihihihihiih")
+        service.postCreateRunning(curRunningData).enqueue(object: Callback<ResponseDT> {
+            override fun onResponse(call: Call<ResponseDT>, response: Response<ResponseDT>) {
+                Log.i("createRunning", response.body().toString())
+                MainActivity.user.running.add(response.body()!!.message)
+                Log.d("user", "${MainActivity.user}")
+            }
+
+            override fun onFailure(call: Call<ResponseDT>, t: Throwable) {
+
+            }
+        })
 
         // 카메라 이동
         var center = LatLng(totLat / path.size, totLon / path.size)

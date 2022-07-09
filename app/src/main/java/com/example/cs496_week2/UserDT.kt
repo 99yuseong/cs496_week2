@@ -6,6 +6,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 data class UserDT (
+    val _id: String,
     val id: Long,
     val name: String,
     val imgUrl: String,
@@ -23,6 +24,7 @@ data class LocationDT (
 )
 
 data class RunningData (
+    val user: String,
     var startDate: Date,
     var endDate: Date,
     var path: MutableList<LatLng>,
@@ -30,6 +32,8 @@ data class RunningData (
     var dist: Double,
     var avgPace: Double,
     var subDist: MutableList<Double>,
-){
+)
 
-}
+data class ResponseDT (
+    val message: String
+)
