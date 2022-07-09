@@ -1,6 +1,7 @@
 package com.example.cs496_week2
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.Date
 
 class historyListAdapter(private val histories: MutableList<RunningData>) : BaseAdapter(){
 
@@ -35,12 +37,23 @@ class historyListAdapter(private val histories: MutableList<RunningData>) : Base
         val dateFormatter = SimpleDateFormat("yyyy / MM / dd", Locale.getDefault())
         val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
 
+        val paceMin = (history.avgPace / 60).toInt()
+        val paceSec = (history.avgPace % 60).toInt()
+
         if (date != null) {
-            date.setText(dateFormatter.format(history.date))
+            date.setText(dateFormatter.format(history.startDate))
         }
 
         if (time != null) {
-            time.setText("${timeFormatter.format(history.date[0])} ~ ${timeFormatter.format(history.date[1])}")
+            time.setText("${timeFormatter.format(history.startDate)} ~ ${timeFormatter.format(history.endDate)}")
+        }
+
+        if (dist != null) {
+            dist.setText("${String.format("%.2f", history.dist / 1000.0)} km")
+        }
+
+        if (pace != null) {
+            pace.setText("${if(history.dist < 1) 0 else paceMin}' ${if(paceSec >= 10) paceSec else "0${paceSec}"}''")
         }
 
         return convertView

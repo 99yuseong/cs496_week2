@@ -23,7 +23,8 @@ data class LocationDT (
 )
 
 data class RunningData (
-    val date: MutableList<Date>,
+    var startDate: Date,
+    var endDate: Date,
     var path: MutableList<LatLng>,
     var time: Double,
     var dist: Double,

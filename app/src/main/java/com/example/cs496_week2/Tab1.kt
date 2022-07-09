@@ -70,7 +70,8 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     // timer
     private var isRunning = false
     private var timerTask: Timer? = null
-    private var date: MutableList<Date> = mutableListOf()
+    lateinit var startDate: Date
+    lateinit var endDate: Date
     private var time = 0.0
     private var dist = 0.0
     private var subDist: Double = 0.0
@@ -89,7 +90,6 @@ class Tab1 : Fragment(), OnMapReadyCallback {
 
     // running DATA list
     private var firstRunning: Boolean = true
-//    lateinit var runningData: MutableList<RunningData>
 
     // pathline
     var pathLine = PolylineOverlay()
@@ -104,7 +104,6 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     var km = 0.0
     var paceMin = 0
     var paceSec = 0
-//    lateinit var locationOverlay : LocationOverlay
     private val marker = Marker()
 
     // friends
@@ -331,7 +330,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
             path = mutableListOf(LatLng(mLastLocation.latitude, mLastLocation.longitude))
             totLat = mLastLocation.latitude
             totLon = mLastLocation.longitude
-            date.add(Date(System.currentTimeMillis()))
+            startDate = Date(System.currentTimeMillis())
             runStart = false
             locationData = LocationDT(MainActivity.kakaoUser.id!!, prvCoord.latitude, prvCoord.longitude, "imgUrl", "name" )
             mSocket.on("message", Emitter.Listener {
@@ -384,13 +383,9 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                         // 부분 거리 리스트
                         // 평균 페이스
                         avgPace = time / (dist / 1000.0)
+
+                        // 지도상 경로 그리기
                         linePath()
-//                        Log.d("running Data", "path : ${path.toString()}")
-//                        Log.d("subDist", "subDist : ${subDist}")
-//                        Log.d("dist", "dist : ${dist}")
-//                        Log.d("subDistList", "subDistList : ${subDistList.toString()}")
-//                        Log.d("prevCoord", "prevCoord : ${prvCoord}")
-//                        Log.d("time", "time: ${time}")
                         prvCoord = LatLng(mLastLocation.latitude, mLastLocation.longitude)
                         min = (time / 60).toInt()
                         sec = (time % 60).toInt()
@@ -433,8 +428,8 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         startBtn.setImageResource(R.drawable.ic_round_play_arrow_24)
         timerTask?.cancel()	// timerTask가 null이 아니라면 cancel() 호출
         mSocket.disconnect()
-        date.add(Date(System.currentTimeMillis()))
-        curRunningData = RunningData(date, path, time, dist, avgPace, subDistList)
+        endDate = Date(System.currentTimeMillis())
+        curRunningData = RunningData(startDate, endDate, path, time, dist, avgPace, subDistList)
         // 데이터 저장
         MainActivity.user.running.add(curRunningData)
 
@@ -453,12 +448,6 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         totLat = 0.0
         totLon = 0.0
         runStart = true
-        Log.d("running Data", "path : ${path.toString()}")
-        Log.d("subDist", "subDist : ${subDist}")
-        Log.d("dist", "dist : ${dist}")
-        Log.d("subDistList", "subDistList : ${subDistList.toString()}")
-        Log.d("time", "time: ${time}")
-        Log.d("avgpace", "avgpac : ${avgPace}")
     }
 
     private fun calDist(lat1:Double, lon1:Double, lat2:Double, lon2:Double) : Double {

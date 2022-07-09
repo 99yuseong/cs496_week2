@@ -1,5 +1,6 @@
 package com.example.cs496_week2
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,6 +13,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class UserListAdapter(val context: Context, val userList: ArrayList<UserDT>) : BaseAdapter() {
+    @SuppressLint("ViewHolder")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val view: View = LayoutInflater.from(context).inflate(R.layout.user_item, null)
 
