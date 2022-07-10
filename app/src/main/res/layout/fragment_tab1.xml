@@ -68,7 +68,8 @@
                 android:layout_marginRight="30dp"
                 android:layout_gravity="center_horizontal"
                 android:background="@drawable/round"
-                android:src="@drawable/ic_round_play_arrow_24" />
+                android:src="@drawable/ic_round_play_arrow_24"
+                android:visibility="gone"/>
 
             <ImageView
                 android:id="@+id/stop"

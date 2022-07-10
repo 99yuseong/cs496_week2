@@ -37,7 +37,7 @@ class historyListAdapter(private val histories: MutableList<RunningData>, privat
         var dist : TextView? = convertView?.findViewById(R.id.history_distance)
         var pace : TextView? = convertView?.findViewById(R.id.history_pace)
 
-        val dateFormatter = SimpleDateFormat("yyyy / MM / dd", Locale.getDefault())
+        val dateFormatter = SimpleDateFormat("yyyy.MM.dd.", Locale.getDefault())
         val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
 
         val paceMin = (history.avgPace / 60).toInt()
@@ -45,10 +45,10 @@ class historyListAdapter(private val histories: MutableList<RunningData>, privat
 
         if (location != null) {
             location.setText(getLocaionName(position))
-            Log.d("user", MainActivity.user.running.toString())
         }
 
         if (date != null) {
+            Log.d("date", history.startDate.toString())
             date.setText(dateFormatter.format(history.startDate))
         }
 

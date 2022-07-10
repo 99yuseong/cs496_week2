@@ -2,6 +2,7 @@ package com.example.cs496_week2
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
@@ -33,6 +34,7 @@ class Tab4 : Fragment() {
     lateinit var totPace : TextView
     lateinit var historyListAdapter: historyListAdapter
     lateinit var geocoder : Geocoder
+    var serverRunData : MutableList<RunningData> = mutableListOf()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -61,6 +63,14 @@ class Tab4 : Fragment() {
         totRun = root.findViewById(R.id.total_run)
         totKm = root.findViewById(R.id.total_km)
         totPace = root.findViewById(R.id.total_pace)
+
+        histroyList!!.setOnItemClickListener { parent, view, position, id ->
+            val intent = Intent(mainActivity, historyDetailActivity::class.java)
+            intent.putExtra("user", serverRunData[position].user)
+            intent.putExtra("position", position)
+            startActivity(intent)
+        }
+
         return root
     }
 
@@ -69,33 +79,33 @@ class Tab4 : Fragment() {
         super.onResume()
         Log.d("user", MainActivity.user.toString())
 
-        service.getRunningData(MainActivity.user._id).enqueue(object : Callback<ArrayList<RunningData>> {
-            override fun onResponse(call: Call<ArrayList<RunningData>>?, response: Response<ArrayList<RunningData>>?) {
+        service.getRunningData(MainActivity.user._id).enqueue(object : Callback<MutableList<RunningData>> {
+            override fun onResponse(call: Call<MutableList<RunningData>>?, response: Response<MutableList<RunningData>>?) {
                 if(response!!.isSuccessful) {
                     Log.d("running is back",response.body().toString() )
+                    serverRunData = response.body()!!
+                    historyListAdapter = historyListAdapter(serverRunData, geocoder)
+                    histroyList.adapter = historyListAdapter
+
+                    var tDist = 0.0
+                    var tPace = 0.0
+                    var tPaceMin = 0
+                    var tPaceSec = 0
+                    for(i in 0 until serverRunData.size){
+                        tDist += serverRunData[i].dist
+                        tPace += serverRunData[i].avgPace
+                    }
+                    tPace = if(serverRunData.size == 0) 0.0 else tPace / serverRunData.size
+                    tPaceMin = (tPace / 60).toInt()
+                    tPaceSec = (tPace % 60).toInt()
+                    totRun.setText(serverRunData.size.toString())
+                    totKm.setText("${String.format("%.2f", tDist / 1000.0)} km")
+                    totPace.setText("${if(tDist < 1) 0 else tPaceMin}' ${if(tPaceSec >= 10) tPaceSec else "0${tPaceSec}"}''")
                 }
             }
-            override fun onFailure(call: Call<ArrayList<RunningData>>?, t: Throwable?) {
+            override fun onFailure(call: Call<MutableList<RunningData>>?, t: Throwable?) {
             }
         })
-
-//        historyListAdapter = historyListAdapter(MainActivity.user.running, geocoder)
-//        histroyList.adapter = historyListAdapter
-//
-//        var tDist = 0.0
-//        var tPace = 0.0
-//        var tPaceMin = 0
-//        var tPaceSec = 0
-//        for(i in 0 until MainActivity.user.running.size){
-//            tDist += MainActivity.user.running[i].dist
-//            tPace += MainActivity.user.running[i].avgPace
-//        }
-//        tPace = if(MainActivity.user.running.size == 0) 0.0 else tPace / MainActivity.user.running.size
-//        tPaceMin = (tPace / 60).toInt()
-//        tPaceSec = (tPace % 60).toInt()
-//        totRun.setText(MainActivity.user.running.size.toString())
-//        totKm.setText("${String.format("%.2f", tDist / 1000.0)} km")
-//        totPace.setText("${if(tDist < 1) 0 else tPaceMin}' ${if(tPaceSec >= 10) tPaceSec else "0${tPaceSec}"}''")
     }
 
     companion object {

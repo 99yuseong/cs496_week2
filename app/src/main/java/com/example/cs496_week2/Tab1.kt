@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.PointF
 import android.location.Location
-import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -24,15 +23,15 @@ import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import com.example.cs496_week2.databinding.FragmentTab1Binding
 import com.google.android.gms.location.*
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.tabs.TabLayout
 import com.google.gson.Gson
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
-import com.naver.maps.map.overlay.LocationOverlay
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PolylineOverlay
 import com.naver.maps.map.util.FusedLocationSource
-import io.socket.client.Manager
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
 import kotlinx.coroutines.CoroutineScope
@@ -46,7 +45,6 @@ import retrofit2.Response
 import java.io.IOException
 import java.net.MalformedURLException
 import java.net.URL
-import java.sql.Struct
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 
@@ -81,8 +79,8 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     private var subDist: Double = 0.0
     private var avgPace: Double = 0.0
     lateinit var prvCoord: LatLng
-    private lateinit var path: MutableList<LatLng>
-    private var subDistList: MutableList<Double> = mutableListOf(0.0)
+    private var path: MutableList<LatLng> = mutableListOf()
+    private var subDistList: MutableList<Double> = mutableListOf()
     val l = ReentrantLock()
     private var totLat : Double = 0.0
     private var totLon : Double = 0.0
@@ -103,6 +101,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     lateinit var kmView : TextView
     lateinit var paceView : TextView
     lateinit var infoLayout : LinearLayout
+    lateinit var tabs : TabLayout
     var min = 0
     var sec = 0
     var km = 0.0
@@ -114,6 +113,8 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     lateinit var user: UserDT
     lateinit var locationData : LocationDT
     var runningFriends : MutableList<LocationDT> = mutableListOf()
+    var toRemoveFriendsMarker : MutableList<Marker> = mutableListOf()
+    var friendsMarker : MutableMap<String, Marker> = mutableMapOf()
 
     // socket
     lateinit var mSocket: Socket
@@ -156,43 +157,17 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         root = inflater.inflate(R.layout.fragment_tab1, container, false)
 
         timeView = root.findViewById(R.id.time)
         kmView = root.findViewById(R.id.kilometer)
         paceView = root.findViewById(R.id.pace)
         infoLayout = root.findViewById(R.id.runningInfo)
+        tabs = mainActivity.findViewById(R.id.tabs)
 
         startBtn = root.findViewById(R.id.start)
         stopBtn = root.findViewById(R.id.stop)
 
-        startBtn.setOnClickListener {
-            if(!isRunning) {
-                start()
-                infoLayout.layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.MATCH_PARENT
-                )
-                mapView.layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    700
-                )
-            } else {
-                pause()
-            }
-        }
-        stopBtn.setOnClickListener {
-            reset()
-            infoLayout.layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                0
-            )
-            mapView.layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-            )
-        }
         return root
     }
 
@@ -233,15 +208,72 @@ class Tab1 : Fragment(), OnMapReadyCallback {
 
     override fun onResume() {
         super.onResume()
-        mSocket.connect()
         mapView.onResume()
+        mSocket.connect()
+        mSocket.on("message", Emitter.Listener {
+            var jObject = JSONObject(it[0].toString())
+            var id = jObject.getString("id")
+            var lat = jObject.getString("lat")
+            var lon = jObject.getString("lon")
+            var name = jObject.getString("name")
+            var imgUrl = jObject.getString("imgUrl")
+            var inFriendList = false
+
+            if (runningFriends.size == 0 && id.toLong() != MainActivity.kakaoUser.id) {
+                runningFriends.add(LocationDT(id.toLong(), lat.toDouble(), lon.toDouble(), imgUrl, name))
+                friendsMarker[id] = Marker()
+            } else {
+                for (i in 0 until runningFriends.size) {
+                    if(id.toLong() == runningFriends[i].id) {
+                        inFriendList = true
+                        runningFriends[i].lat = lat.toDouble()
+                        runningFriends[i].lon = lon.toDouble()
+                    }
+                }
+                if(!inFriendList && id.toLong() != MainActivity.kakaoUser.id) {
+                    runningFriends.add(LocationDT(id.toLong(), lat.toDouble(), lon.toDouble(), imgUrl, name))
+                    friendsMarker[id] = Marker()
+                }
+            }
+        })
+        mSocket.on("endRun", Emitter.Listener {
+            var jObject = JSONObject(it[0].toString())
+            var id = jObject.getString("id")
+            if (friendsMarker.size > 0 && friendsMarker[id] != null){
+                toRemoveFriendsMarker.add(friendsMarker[id]!!)
+                for (i in 0 until runningFriends.size) {
+                    if(id.toLong() == runningFriends[i].id) {
+                        runningFriends.removeAt(i)
+                        friendsMarker.remove(id)
+                    }
+                }
+            }
+        })
+        timerTask = kotlin.concurrent.timer(period = 1000) {	// timer() 호출
+            mainActivity.runOnUiThread {
+                startLocationUpdates()
+                // draw friends
+                for(i in 0 until runningFriends.size){
+                    friendMarker(i)
+                }
+                if(isRunning){
+                    start()
+                }
+                for (i in 0 until toRemoveFriendsMarker.size) {
+                    toRemoveFriendsMarker[i].map = null
+                    toRemoveFriendsMarker.removeAt(i)
+                }
+            }
+        }
     }
 
     override fun onPause() {
         super.onPause()
         mSocket.disconnect()
         mapView.onPause()
+        timerTask?.cancel()	// timerTask가 null이 아니라면 cancel() 호출
     }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         mapView.onSaveInstanceState(outState)
@@ -297,24 +329,44 @@ class Tab1 : Fragment(), OnMapReadyCallback {
             }
         } finally {
             l.unlock()
+            startBtn.setOnClickListener {
+                if(!isRunning) {
+                    isRunning = true
+                    infoLayout.layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.MATCH_PARENT
+                    )
+                    mapView.layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        700
+                    )
+                    tabs.layoutParams = AppBarLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        0
+                    )
+
+                } else {
+                    pause()
+                }
+            }
+            stopBtn.setOnClickListener {
+                reset()
+                infoLayout.layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    0
+                )
+                mapView.layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT
+                )
+                tabs.layoutParams = AppBarLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT
+                )
+            }
+            startBtn.visibility = View.VISIBLE
         }
     }
-
-//    // 위치 권한이 있는지 확인하는 메서드
-//    private fun checkPermissionForLocation(context: Context): Boolean {
-//        // Android 6.0 Marshmallow 이상에서는 위치 권한에 추가 런타임 권한이 필요
-//        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            if (context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-//                true
-//            } else {
-//                // 권한이 없으므로 권한 요청 알림 보내기
-//                ActivityCompat.requestPermissions(mainActivity, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_PERMISSION_LOCATION)
-//                false
-//            }
-//        } else {
-//            true
-//        }
-//    }
 
     // 사용자에게 권한 요청 후 결과에 대한 처리 로직
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -333,95 +385,60 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     @SuppressLint("SetTextI18n")
     private fun start() {
         isRunning = true
-        stopBtn.visibility = View.VISIBLE
-        startBtn.setImageResource(R.drawable.ic_round_pause_24)
-
         if(runStart){
+            stopBtn.visibility = View.VISIBLE
+            startBtn.setImageResource(R.drawable.ic_round_pause_24)
             prvCoord = LatLng(mLastLocation.latitude, mLastLocation.longitude)
-            path = mutableListOf(LatLng(mLastLocation.latitude, mLastLocation.longitude))
             totLat = mLastLocation.latitude
             totLon = mLastLocation.longitude
+            path.add(LatLng(mLastLocation.latitude, mLastLocation.longitude))
             startDate = Date(System.currentTimeMillis())
             runStart = false
             locationData = LocationDT(MainActivity.kakaoUser.id!!, prvCoord.latitude, prvCoord.longitude, "imgUrl", "name" )
-            mSocket.on("message", Emitter.Listener {
-                var jObject = JSONObject(it[0].toString())
-                var id = jObject.getString("id")
-                var lat = jObject.getString("lat")
-                var lon = jObject.getString("lon")
-                var name = jObject.getString("name")
-                var imgUrl = jObject.getString("imgUrl")
-                var inFriendList = false
-
-                if (runningFriends.size == 0 && id.toLong() != MainActivity.kakaoUser.id) {
-                    runningFriends.add(LocationDT(id.toLong(), lat.toDouble(), lon.toDouble(), imgUrl, name))
-                } else {
-                    for (i in 0..runningFriends.size-1) {
-                        if(id.toLong() == runningFriends[i].id) {
-                            inFriendList = true
-                        }
-                    }
-                    if(!inFriendList && id.toLong() != MainActivity.kakaoUser.id) {
-                        runningFriends.add(LocationDT(id.toLong(), lat.toDouble(), lon.toDouble(), imgUrl, name))
-                    }
-                }
-            })
         }
 
-        timerTask = kotlin.concurrent.timer(period = 250) {	// timer() 호출
-            mainActivity.runOnUiThread {
-                l.lock()
-                try {
-                    // 경로 좌표
-                    if ( (time * 100) % 100 == 0.0 ){
-                        startLocationUpdates()
-                        path.add(LatLng(mLastLocation.latitude, mLastLocation.longitude))
-                        locationData.lat = mLastLocation.latitude
-                        locationData.lon = mLastLocation.longitude
-                        totLat += mLastLocation.latitude
-                        totLon += mLastLocation.longitude
-                        // 부분 거리
-                        subDist = calDist(
-                            prvCoord.latitude,
-                            prvCoord.longitude,
-                            mLastLocation.latitude,
-                            mLastLocation.longitude
-                        )
-                        // 총 거리
-                        dist += subDist
-                        // 부분 거리 리스트
-                        subDistList.add(subDist)
-                        // 부분 거리 리스트
-                        // 평균 페이스
-                        avgPace = time / (dist / 1000.0)
-
-                        // 지도상 경로 그리기
-                        linePath()
-                        prvCoord = LatLng(mLastLocation.latitude, mLastLocation.longitude)
-                        min = (time / 60).toInt()
-                        sec = (time % 60).toInt()
-                        km = dist / 1000
-                        paceMin = (avgPace / 60).toInt()
-                        paceSec = (avgPace % 60).toInt()
-                        timeView.text = "${if(min >= 10) min else "0${min}"}:${if(sec >= 10) sec else "0${sec}"}"
-                        kmView.text = "${String.format("%.2f", km)} km"
-                        paceView.text = "${if(dist < 1) 0 else paceMin}' ${if(paceSec >= 10) paceSec else "0${paceSec}"}''"
-
-                        // draw friends
-                        if(runningFriends.size != 0) {
-                            for(i in 0..runningFriends.size-1){
-                                friendMarker(i)
-                            }
-                        }
-                            // socket
-                        mSocket.emit("curRunning", Gson().toJson(locationData))
-                    }
-                    // 시간
-                    time += 0.25
-                } finally {
-                    l.unlock()
-                }
-            }
+//        timerTask = kotlin.concurrent.timer(period = 1000) {	// timer() 호출
+//            mainActivity.runOnUiThread {
+        l.lock()
+        try {
+            // 경로 좌표
+//                    startLocationUpdates()
+            path.add(LatLng(mLastLocation.latitude, mLastLocation.longitude))
+            locationData.lat = mLastLocation.latitude
+            locationData.lon = mLastLocation.longitude
+            totLat += mLastLocation.latitude
+            totLon += mLastLocation.longitude
+            // 부분 거리
+            subDist = calDist(
+                prvCoord.latitude,
+                prvCoord.longitude,
+                mLastLocation.latitude,
+                mLastLocation.longitude
+            )
+            // 시간
+            time ++
+            // 총 거리
+            dist += subDist
+            // 부분 거리 리스트
+            // 부분 거리 리스트
+            // 평균 페이스
+            avgPace = time / (dist / 1000.0)
+            subDistList.add((avgPace) / 60.0 * (-1))
+            // 지도상 경로 그리기
+            linePath()
+            prvCoord = LatLng(mLastLocation.latitude, mLastLocation.longitude)
+            min = (time / 60).toInt()
+            sec = (time % 60).toInt()
+            km = dist / 1000.0
+            paceMin = (avgPace / 60).toInt()
+            paceSec = (avgPace % 60).toInt()
+            timeView.text = "${if(min >= 10) min else "0${min}"}:${if(sec >= 10) sec else "0${sec}"}"
+            kmView.text = "${String.format("%.2f", km)} km"
+            paceView.text = "${if(dist < 1) 0 else paceMin}' ${if(paceSec >= 10) paceSec else "0${paceSec}"}''"
+            // socket
+            mSocket.emit("curRunning", Gson().toJson(locationData))
+        } finally {
+            l.unlock()
         }
     }
 
@@ -429,7 +446,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         isRunning = false
         stopBtn.visibility = View.GONE
         startBtn.setImageResource(R.drawable.ic_round_play_arrow_24)
-        timerTask?.cancel();	// 안전한 호출(?.)로 timerTask가 null이 아니면 cancel() 호출
+//        timerTask?.cancel();	// 안전한 호출(?.)로 timerTask가 null이 아니면 cancel() 호출
 
     }
 
@@ -437,7 +454,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         isRunning = false
         stopBtn.visibility = View.GONE
         startBtn.setImageResource(R.drawable.ic_round_play_arrow_24)
-        timerTask?.cancel()	// timerTask가 null이 아니라면 cancel() 호출
+//        timerTask?.cancel()	// timerTask가 null이 아니라면 cancel() 호출
 
         endDate = Date(System.currentTimeMillis())
         var pathTmp : MutableList<LatLng> = mutableListOf()
@@ -445,26 +462,22 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         pathTmp.addAll(path)
         subDistListTmp.addAll(subDistList)
         curRunningData = RunningData(MainActivity.user._id, startDate, endDate, pathTmp, time, dist, avgPace, subDistListTmp)
-
-        Log.d("teeeeeest", "hihihihihihiih")
+        Log.d("before emit", MainActivity.user._id)
+        mSocket.emit("endRunning", MainActivity.user._id)
+        Log.d("after emit", "after emit")
         service.postCreateRunning(curRunningData).enqueue(object: Callback<ResponseDT> {
             override fun onResponse(call: Call<ResponseDT>, response: Response<ResponseDT>) {
-                Log.i("createRunning", response.body().toString())
                 MainActivity.user.running.add(response.body()!!.message)
-                Log.d("user", "${MainActivity.user}")
+                // 카메라 이동
+                var center = LatLng(totLat / path.size, totLon / path.size)
+                val cameraUpdate = CameraUpdate.scrollTo(LatLng(center.latitude, center.longitude))
+                    .pivot(PointF(0.5f, 0.5f)).animate(CameraAnimation.Fly, 500)
+                naverMap.moveCamera(cameraUpdate)
             }
-
             override fun onFailure(call: Call<ResponseDT>, t: Throwable) {
-
+                Log.d("failed", "fail")
             }
         })
-
-        // 카메라 이동
-        var center = LatLng(totLat / path.size, totLon / path.size)
-        val cameraUpdate = CameraUpdate.scrollTo(LatLng(center.latitude, center.longitude))
-            .pivot(PointF(0.5f, 0.5f)).animate(CameraAnimation.Fly, 500)
-        naverMap.moveCamera(cameraUpdate)
-
         time = 0.0
         dist = 0.0
         subDist = 0.0
@@ -493,7 +506,6 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     private fun linePath() {
         pathLine.coords = path
         pathLine.width = 30
-//        pathLine.outlineWidth = 2
         pathLine.color = Color.BLUE
         pathLine.map = naverMap
         pathLine.joinType = PolylineOverlay.LineJoin.Round
@@ -501,17 +513,19 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     }
 
     private fun friendMarker(idx: Int){
-        var friendMarker = Marker()
+        var friendMarker = friendsMarker[runningFriends[idx].id.toString()]
         var imageUrl = runningFriends[idx].imgUrl
         CoroutineScope(Dispatchers.Main).launch {
             val bitmap = withContext(Dispatchers.IO) {
                 ImageLoader.loadImage(imageUrl)
             }
-            friendMarker.position = LatLng(runningFriends[idx].lat, runningFriends[idx].lon)
-            friendMarker.map = naverMap
-            friendMarker.icon = OverlayImage.fromBitmap(bitmap!!)
-            friendMarker.captionText = runningFriends[idx].name
+            if (friendMarker != null) {
+                friendMarker.position = LatLng(runningFriends[idx].lat, runningFriends[idx].lon)
+                friendMarker.map = naverMap
+                friendMarker.icon = OverlayImage.fromBitmap(bitmap!!)
+                friendMarker.captionText = runningFriends[idx].name
 //            friendMarker.zIndex = 100
+            }
         }
     }
 

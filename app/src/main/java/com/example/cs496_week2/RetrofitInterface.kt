@@ -1,5 +1,6 @@
 package com.example.cs496_week2
 
+import android.icu.text.Transliterator
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -55,8 +56,13 @@ class RetrofitInterface {
         @GET("/running/get_data")
         fun getRunningData(
             @Query("id") id : String
-        ) : Call<ArrayList<RunningData>>
+        ) : Call<MutableList<RunningData>>
 
+        @GET("/running/get_each_data")
+        fun getEachRunningData(
+            @Query("id") id: String,
+            @Query("position") position: Int
+        ) : Call<RunningData>
 
     }
 }

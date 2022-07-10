@@ -32,7 +32,8 @@ data class RunningData (
     var dist: Double,
     var avgPace: Double,
     var subDist: MutableList<Double>,
-)
+) {
+}
 
 data class ResponseDT (
     val message: String

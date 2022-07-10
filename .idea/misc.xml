@@ -11,6 +11,7 @@
         <entry key="app/src/main/res/drawable/ic_round_stop_24.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/round.xml" value="0.1" />
         <entry key="app/src/main/res/layout-w1240dp/activity_login.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_history_detail.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.45892333984375" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_tab1.xml" value="0.1596009975062344" />
