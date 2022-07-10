@@ -21,6 +21,8 @@ class Tab3 : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
 
+    lateinit var root :View
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -34,7 +36,20 @@ class Tab3 : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_tab3, container, false)
+        root = inflater.inflate(R.layout.fragment_tab3, container, false)
+        return root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val createGroupBtn: View = root.findViewById(R.id.create_group)
+
+        createGroupBtn.setOnClickListener { view ->
+            val popup = CreateGroupPopup(view.context)
+            popup.showDialog()
+        }
+
     }
 
     companion object {

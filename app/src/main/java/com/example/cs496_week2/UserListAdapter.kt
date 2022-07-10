@@ -8,21 +8,31 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
-import android.widget.SearchView
 import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
+import androidx.core.graphics.drawable.toDrawable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class UserListAdapter(val context: Context, val userList: ArrayList<UserDT>) : BaseAdapter() {
     @SuppressLint("ViewHolder")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val view: View = LayoutInflater.from(context).inflate(R.layout.user_item, null)
+        val view: View = LayoutInflater.from(context).inflate(R.layout.search_user_item, null)
 
         val name = view.findViewById<TextView>(R.id.nameTv)
+        val profileIv = view.findViewById<ImageView>(R.id.si_profile)
 
         val info = userList[position]
-        Log.d("name", info.name)
+
+        CoroutineScope(Dispatchers.Main).launch {
+            val bitmap = withContext(Dispatchers.IO) {
+                ImageLoader.loadImage(info.imgUrl)
+            }
+            profileIv.setImageDrawable(bitmap?.toDrawable(context.resources))
+        }
+
         name.text = info.name
-        Log.d("adapter", position.toString())
         return view
     }
 

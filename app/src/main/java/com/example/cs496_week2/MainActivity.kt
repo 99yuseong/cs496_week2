@@ -5,6 +5,8 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -45,6 +47,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val toolbar: Toolbar = findViewById(R.id.my_toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+
+
         binding.viewpager.apply {
             adapter = MyPagerAdapter(context as FragmentActivity)
         }
@@ -64,15 +71,19 @@ class MainActivity : AppCompatActivity() {
                 super.onPageSelected(position)
                 when (position) {
                     0-> {
+                        toolbar.title = "Running"
                         binding.viewpager.isUserInputEnabled = false;
                     }
                     1-> {
+                        toolbar.title = "Friends"
                         binding.viewpager.isUserInputEnabled = true;
                     }
                     2-> {
+                        toolbar.title = "Groups"
                         binding.viewpager.isUserInputEnabled = true;
                     }
                     3-> {
+                        toolbar.title = "Records"
                         binding.viewpager.isUserInputEnabled = true;
                     }
                 }

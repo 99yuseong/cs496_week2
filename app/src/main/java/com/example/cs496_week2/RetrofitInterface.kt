@@ -36,17 +36,32 @@ class RetrofitInterface {
 
         @GET("/user/search_name")
         fun getSearchName(
-            @Query("myId") myId: Long,
+            @Query("myId") myId: String,
             @Query("searchName") searchName: String
         ): Call<ArrayList<UserDT>>
 
+//        @GET("/user/search_friend_name")
+//        fun getSearchFriendName(
+//            @Query("myId") myId: String,
+//            @Query("searchName") searchName: String
+//        ): Call<ArrayList<UserDT>>
 
-//        @GET("/user/add_friend")
-//        fun getAddFriend(
-//            @Query("name") name: String,
-//            @Query("invite") invite: String
-//        ): String
 
+        @GET("/user/add_friend")
+        fun getAddFriend(
+            @Query("myId") myId: String,
+            @Query("inviteId") inviteId: String
+        ): Call<ResponseDT>
+
+        @GET("/user/friends")
+        fun getFriends(
+            @Query("id") id : String
+        ) : Call<ArrayList<UserDT>>
+
+        @GET("/running/filter_data")
+        fun getFilterData(
+            @Query("id") id : String
+        ) : Call<ArrayList<RunningData>>
 
         @POST("/running/create_running")
         fun postCreateRunning(

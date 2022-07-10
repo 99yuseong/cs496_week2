@@ -1,15 +1,16 @@
 package com.example.cs496_week2
 
-import android.content.Intent.getIntent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.widget.ListView
 import androidx.fragment.app.Fragment
-import io.socket.client.Socket
-import java.net.URISyntaxException
+import com.example.cs496_week2.RetrofitInterface.Companion.service
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -26,7 +27,6 @@ class Tab2 : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
-    lateinit var mSocket: Socket
 
     lateinit var root :View
 
@@ -50,16 +50,33 @@ class Tab2 : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val friendListLv = root.findViewById<ListView>(R.id.friend_list)
         val addFriendBtn : View = root.findViewById(R.id.add_friend)
+
+        var friendList = arrayListOf<UserDT>()
+        var friendListAdapter = FriendListAdapter(view.context, friendList)
+
+        service.getFriends(MainActivity.user._id).enqueue(object : Callback<ArrayList<UserDT>> {
+            override fun onResponse(call: Call<ArrayList<UserDT>>, response: Response<ArrayList<UserDT>>) {
+                if(response!!.isSuccessful) {
+                    Log.d("Friends", response.body()!!.toString())
+                    response.body()!!.map {
+                        friendList.add(it)
+                    }
+                    friendListAdapter.notifyDataSetChanged()
+                    friendListLv.adapter = friendListAdapter
+                }
+            }
+
+            override fun onFailure(call: Call<ArrayList<UserDT>>, t: Throwable) {
+                TODO("Not yet implemented")
+            }
+        })
 
         addFriendBtn.setOnClickListener { view ->
             val popup = AddFriendPopup(view.context)
-            popup.showDialog()
+            popup.showDialog(friendList, friendListAdapter)
         }
-
-//        mSocket = SocketApplication.get()
-//        mSocket.connect()
-//        mSocket.emit("message", "hello")
     }
 
     companion object {

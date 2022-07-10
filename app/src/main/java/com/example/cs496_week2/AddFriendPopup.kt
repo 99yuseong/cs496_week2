@@ -7,6 +7,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
+import com.example.cs496_week2.RetrofitInterface.Companion.service
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -15,38 +16,44 @@ import retrofit2.Response
 class AddFriendPopup(context: Context) {
     val context = context
     private val dialog = Dialog(context)
-    val service = RetrofitInterface.service
 
-
-    fun showDialog() {
+    fun showDialog(friendList: ArrayList<UserDT>, friendListAdapter: FriendListAdapter) {
         dialog.setContentView(R.layout.add_friend_popup)
         dialog.window!!.setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT)
         dialog.setCanceledOnTouchOutside(true)
         dialog.setCancelable(true)
         dialog.show()
 
-        val search_name= dialog.findViewById<SearchView>(R.id.search_name)
+        val search_name = dialog.findViewById<SearchView>(R.id.search_name)
         val listview = dialog.findViewById<ListView>(R.id.friend_list)
-        val testBtn = dialog.findViewById<Button>(R.id.test_button)
 
         val searchResult = arrayListOf<UserDT>()
 
         val listAdapter = UserListAdapter(context, searchResult)
         listview.adapter = listAdapter
 
-        testBtn.setOnClickListener {
-            Log.i("TEST", "test click!!!!!!")
-        }
-
         listview.setOnItemClickListener { adapterView, view, position, l ->
+            service.getAddFriend(MainActivity.user._id, searchResult[position]._id).enqueue(object : Callback<ResponseDT> {
+                override fun onResponse(call: Call<ResponseDT>?, response: Response<ResponseDT>?) {
+                    if(response!!.isSuccessful) {
+                        Log.d("new friend", response.body()!!.message)
+                        MainActivity.user.friends.add(response.body()!!.message)
+                        friendList.add(searchResult[position])
+                        friendListAdapter.notifyDataSetChanged()
+                    }
+                }
 
+                override fun onFailure(call: Call<ResponseDT>?, t: Throwable?) {
+                    Log.e("retrofit", t.toString())
+                }
+            })
         }
 
         search_name.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(p0: String): Boolean {
-                Log.i("SEARCH", p0)
+                if(p0 == "") return true
                 searchResult.clear()
-                service.getSearchName(MainActivity.user.id, p0).enqueue(object : Callback<ArrayList<UserDT>> {
+                service.getSearchName(MainActivity.user._id, p0).enqueue(object : Callback<ArrayList<UserDT>> {
                     override fun onResponse(call: Call<ArrayList<UserDT>>?, response: Response<ArrayList<UserDT>>?) {
                         if(response!!.isSuccessful) {
                             Log.d("retrofit", response?.body().toString())
@@ -69,9 +76,5 @@ class AddFriendPopup(context: Context) {
                 return true
             }
         })
-
-
-
     }
-
 }
