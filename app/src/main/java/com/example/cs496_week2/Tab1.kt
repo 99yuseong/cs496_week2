@@ -222,6 +222,12 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                     val groupListAdapter = GroupListAdapter(groupList!!)
                     groupListRv.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
                     groupListRv.adapter = groupListAdapter
+
+                    groupListAdapter.setItemClickListener(object: GroupListAdapter.OnItemClickListener {
+                        override fun onClick(v: View, position: Int) {
+                            Log.d("click", groupList[position].groupName)
+                        }
+                    })
                 }
             }
             override fun onFailure(call: Call<ArrayList<GroupDT>>, t: Throwable) {

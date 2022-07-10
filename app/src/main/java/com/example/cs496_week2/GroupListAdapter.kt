@@ -3,16 +3,12 @@ package com.example.cs496_week2
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.graphics.drawable.toDrawable
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class GroupListAdapter(private val groupList: ArrayList<GroupDT>): RecyclerView.Adapter<GroupListAdapter.MyViewHolder>() {
+    private lateinit var itemClickListener : OnItemClickListener
+
     inner class MyViewHolder(itemView: View?): RecyclerView.ViewHolder(itemView!!) {
         val groupNameTv = itemView!!.findViewById<TextView>(R.id.gi_group_name)
 
@@ -34,4 +30,13 @@ class GroupListAdapter(private val groupList: ArrayList<GroupDT>): RecyclerView.
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         holder.bind(groupList[position], position)
     }
+
+    interface OnItemClickListener {
+        fun onClick(v: View, position: Int)
+    }
+
+    fun setItemClickListener(onItemClickListener: OnItemClickListener) {
+        this.itemClickListener = onItemClickListener
+    }
+
 }
