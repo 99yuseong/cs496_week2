@@ -22,9 +22,6 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-//        val keyHash = Utility.getKeyHash(this)//onCreate 안에 입력해주자
-//        Log.d("Hash", keyHash)
-        // 로그인 정보 확인
 
         val intent = Intent(this, MainActivity::class.java)
 
@@ -58,9 +55,7 @@ class LoginActivity : AppCompatActivity() {
             else if (tokenInfo != null) {
 //                Toast.makeText(this, "토큰 정보 보기 성공", Toast.LENGTH_SHORT).show()
                 Toast.makeText(this, "토큰 정보 보기 성공 ${tokenInfo.id}", Toast.LENGTH_SHORT).show()
-
                 buildKakaoAccount()
-
                 finish()
             }
         }
@@ -100,7 +95,6 @@ class LoginActivity : AppCompatActivity() {
             }
             else if (token != null) {
                 Toast.makeText(this, "로그인에 성공하였습니다.", Toast.LENGTH_SHORT).show()
-
                 buildKakaoAccount()
                 finish()
             }

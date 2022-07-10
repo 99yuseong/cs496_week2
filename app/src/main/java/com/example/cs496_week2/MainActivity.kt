@@ -41,16 +41,12 @@ class MainActivity : AppCompatActivity() {
         Log.i("KAKAO", kakaoAccount.toString())
         kakaoUser = kakaoAccount
 
-//        val keyHash = Utility.getKeyHash(this) //onCreate 안에 입력해주자
-//        Log.d("Hash", keyHash)
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         val toolbar: Toolbar = findViewById(R.id.my_toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
-
 
         binding.viewpager.apply {
             adapter = MyPagerAdapter(context as FragmentActivity)
@@ -100,6 +96,7 @@ class MainActivity : AppCompatActivity() {
             }
             override fun onFailure(call: Call<UserDT>?, t: Throwable?) {
                 Log.e("retrofit", t.toString())
+                Log.e("retrofit", call.toString())
             }
         })
     }

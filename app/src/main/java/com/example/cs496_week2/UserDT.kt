@@ -16,7 +16,9 @@ data class UserDT (
 )
 
 data class LocationDT (
+    var _id: String,
     var id: Long,
+    var room: String,
     var lat: Double,
     var lon: Double,
     var imgUrl: String,

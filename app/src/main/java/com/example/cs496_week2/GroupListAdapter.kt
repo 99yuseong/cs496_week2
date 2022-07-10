@@ -12,14 +12,20 @@ class GroupListAdapter(private val groupList: ArrayList<GroupDT>): RecyclerView.
     inner class MyViewHolder(itemView: View?): RecyclerView.ViewHolder(itemView!!) {
         val groupNameTv = itemView!!.findViewById<TextView>(R.id.gi_group_name)
 
-
         fun bind(groupItem: GroupDT, position: Int) {
             groupNameTv.text = groupItem.groupName
+            val pos = adapterPosition
+            if(pos!= RecyclerView.NO_POSITION)
+            {
+                itemView.setOnClickListener {
+                    itemClickListener?.onClick(itemView,pos)
+                }
+            }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.group_item, parent, false)
+        var view = LayoutInflater.from(parent.context).inflate(R.layout.group_item, parent, false)
         return MyViewHolder(view)
     }
 

@@ -50,7 +50,6 @@ class historyDetailActivity : AppCompatActivity() {
             @SuppressLint("SetTextI18n")
             override fun onResponse(call: Call<RunningData>, response: Response<RunningData>) {
                 runningData = response.body()!!
-                Log.d("rundfnsnfusd", runningData.toString())
                 val time = runningData.time
                 val min = (time / 60).toInt()
                 val sec = (time % 60).toInt()
@@ -89,12 +88,12 @@ class historyDetailActivity : AppCompatActivity() {
             val input = runningData.subDist
             val entries: ArrayList<Entry> = ArrayList()
             entries.add(Entry(0F, 0F))
-            val dataset: LineDataSet = LineDataSet(entries, "input")
+            val dataset: LineDataSet = LineDataSet(entries, "Pace")
             val data: LineData = LineData(dataset)
             dataset.lineWidth = 5f
 //            dataset.circleRadius = 6f
             dataset.setDrawValues(false)
-//            dataset.setDrawCircleHole(true)
+            dataset.setDrawCircleHole(false)
 //            dataset.setDrawCircles(true)
             dataset.setDrawHorizontalHighlightIndicator(false)
             dataset.setDrawHighlightIndicators(false)
@@ -157,6 +156,7 @@ class historyDetailActivity : AppCompatActivity() {
                 data.notifyDataChanged()
                 chart.notifyDataSetChanged()
                 chart.invalidate()
+                chart.description.isEnabled = false // chart 밑에 description 표시 유무
             }
         }
     }

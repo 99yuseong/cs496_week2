@@ -44,7 +44,7 @@ class historyListAdapter(private val histories: MutableList<RunningData>, privat
         val paceSec = (history.avgPace % 60).toInt()
 
         if (location != null) {
-            location.setText(getLocaionName(position))
+            location.setText(getLocationName(position))
         }
 
         if (date != null) {
@@ -67,14 +67,23 @@ class historyListAdapter(private val histories: MutableList<RunningData>, privat
         return convertView
     }
 
-    fun getLocaionName(position: Int) : String{
+    fun getLocationName(position: Int) : String {
         Log.d("lat", histories[position].toString())
         Log.d("lat", histories[position].path[0].toString())
         Log.d("lat", histories[position].path[0].latitude.toString())
-        var cityList = geocoder.getFromLocation(histories[position].path[0].latitude, histories[position].path[0].longitude,10)
-        if(cityList != null) {
-            city = cityList.get(0).adminArea
+//        var cityList: String
+        if (geocoder.getFromLocation(
+                histories[position].path[0].latitude,
+                histories[position].path[0].longitude,
+                10
+            ) != null
+        ) {
+            return geocoder.getFromLocation(
+                histories[position].path[0].latitude,
+                histories[position].path[0].longitude,
+                10
+            ).get(0).adminArea.toString()
         }
-        return city
+        return ""
     }
 }

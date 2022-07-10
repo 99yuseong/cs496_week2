@@ -69,7 +69,6 @@ class Tab2 : Fragment() {
             }
 
             override fun onFailure(call: Call<ArrayList<UserDT>>, t: Throwable) {
-                TODO("Not yet implemented")
             }
         })
 
