@@ -3,13 +3,28 @@ package com.example.cs496_week2
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.graphics.drawable.toDrawable
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SelectedListAdapter(private val selectedList: ArrayList<UserDT>): RecyclerView.Adapter<SelectedListAdapter.MyViewHolder>() {
     inner class MyViewHolder(itemView: View?): RecyclerView.ViewHolder(itemView!!) {
         val nameTv = itemView!!.findViewById<TextView>(R.id.si_name)
+        val profileIv = itemView!!.findViewById<ImageView>(R.id.si_profile)
+
+
         fun bind(userItem: UserDT, position: Int) {
+            CoroutineScope(Dispatchers.Main).launch {
+                val bitmap = withContext(Dispatchers.IO) {
+                    ImageLoader.loadImage(userItem.imgUrl)
+                }
+                profileIv.setImageDrawable(bitmap?.toDrawable(itemView.resources))
+            }
             nameTv.text = userItem.name
         }
     }

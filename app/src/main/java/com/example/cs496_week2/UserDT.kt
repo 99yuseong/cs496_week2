@@ -11,7 +11,7 @@ data class UserDT (
     val name: String,
     val imgUrl: String,
     val friends: ArrayList<String>,
-    val group: ArrayList<ArrayList<UserDT>>,
+    val group: ArrayList<String>,
     val running: ArrayList<String>
 )
 
@@ -32,9 +32,14 @@ data class RunningData (
     var dist: Double,
     var avgPace: Double,
     var subDist: MutableList<Double>,
-) {
-}
+)
 
 data class ResponseDT (
     val message: String
+)
+
+data class GroupDT (
+    val _id: String,
+    val groupName: String,
+    val member: ArrayList<String>
 )

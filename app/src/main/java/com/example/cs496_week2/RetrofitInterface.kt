@@ -79,5 +79,10 @@ class RetrofitInterface {
             @Query("position") position: Int
         ) : Call<RunningData>
 
+        @POST("/group/create_group")
+        fun postCreateGroup(
+            @Body group: GroupDT
+        ) : Call<GroupDT>
+
     }
 }

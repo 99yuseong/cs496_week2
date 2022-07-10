@@ -2,7 +2,6 @@ package com.example.cs496_week2
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +20,7 @@ class UserListAdapter(val context: Context, val userList: ArrayList<UserDT>) : B
         val view: View = LayoutInflater.from(context).inflate(R.layout.search_user_item, null)
 
         val name = view.findViewById<TextView>(R.id.nameTv)
-        val profileIv = view.findViewById<ImageView>(R.id.si_profile)
+        val profileIv = view.findViewById<ImageView>(R.id.profileIv)
 
         val info = userList[position]
 

@@ -9,10 +9,11 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.19080505371093748" />
         <entry key="app/src/main/res/layout/add_friend_popup.xml" value="0.2966827392578125" />
         <entry key="app/src/main/res/layout/create_group_popup.xml" value="0.1" />
-        <entry key="app/src/main/res/layout/create_group_popup1.xml" value="0.4131851196289062" />
+        <entry key="app/src/main/res/layout/create_group_popup1.xml" value="0.25673522949218747" />
+        <entry key="app/src/main/res/layout/create_group_popup2.xml" value="0.34331475240704284" />
         <entry key="app/src/main/res/layout/fragment_my.xml" value="0.12943262411347517" />
         <entry key="app/src/main/res/layout/fragment_tab1.xml" value="0.16757246376811594" />
-        <entry key="app/src/main/res/layout/fragment_tab2.xml" value="0.2425689697265625" />
+        <entry key="app/src/main/res/layout/fragment_tab2.xml" value="0.35709436524100474" />
         <entry key="app/src/main/res/layout/fragment_tab3.xml" value="0.25688257632048234" />
         <entry key="app/src/main/res/layout/fragment_tab4.xml" value="0.4165215533712636" />
         <entry key="app/src/main/res/layout/friend_item.xml" value="0.34918118114449537" />

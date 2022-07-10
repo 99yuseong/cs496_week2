@@ -32,7 +32,7 @@
                     android:layout_height="match_parent">
 
                     <ImageView
-                        android:id="@+id/si_profile"
+                        android:id="@+id/profileIv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:layout_constraintBottom_toBottomOf="parent"
