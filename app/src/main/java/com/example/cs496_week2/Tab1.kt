@@ -21,6 +21,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.cs496_week2.databinding.FragmentTab1Binding
 import com.google.android.gms.location.*
 import com.google.android.material.appbar.AppBarLayout
@@ -47,6 +49,7 @@ import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
+import kotlin.collections.ArrayList
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -102,6 +105,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     lateinit var paceView : TextView
     lateinit var infoLayout : LinearLayout
     lateinit var tabs : TabLayout
+    lateinit var groupListRv : RecyclerView
     var min = 0
     var sec = 0
     var km = 0.0
@@ -177,6 +181,8 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.onResume()
         mapView.getMapAsync(this)
+
+        groupListRv = root.findViewById<RecyclerView>(R.id.group_list)
     }
 
     override fun onMapReady(@NonNull naverMap: NaverMap) {
@@ -208,6 +214,20 @@ class Tab1 : Fragment(), OnMapReadyCallback {
 
     override fun onResume() {
         super.onResume()
+
+        service.getGroup(MainActivity.kakaoUser.id!!).enqueue(object : Callback<ArrayList<GroupDT>> {
+            override fun onResponse(call: Call<ArrayList<GroupDT>>, response: Response<ArrayList<GroupDT>>) {
+                if(response.isSuccessful){
+                    val groupList = response.body()
+                    val groupListAdapter = GroupListAdapter(groupList!!)
+                    groupListRv.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+                    groupListRv.adapter = groupListAdapter
+                }
+            }
+            override fun onFailure(call: Call<ArrayList<GroupDT>>, t: Throwable) {
+            }
+        })
+
         mapView.onResume()
         mSocket.connect()
         mSocket.on("message", Emitter.Listener {

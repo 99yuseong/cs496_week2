@@ -84,5 +84,10 @@ class RetrofitInterface {
             @Body group: GroupDT
         ) : Call<GroupDT>
 
+        @GET("/group")
+        fun getGroup(
+            @Query("id") id: Long
+        ) : Call<ArrayList<GroupDT>>
+
     }
 }
