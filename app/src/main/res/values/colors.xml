@@ -8,6 +8,8 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="dark_item">#FF373737</color>
+    <color name="dark">#FF181818</color>
+    <color name="object">#FF00dcdc</color>
     <color name="pace_over_15">#4D90D500</color>
     <color name="pace_15_to_13">#4D9FD702</color>
     <color name="pace_13_to_11">#4DACD70A</color>

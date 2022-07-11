@@ -28,6 +28,7 @@ class Tab4 : Fragment() {
     private lateinit var binding: FragmentTab4Binding
     private lateinit var mainActivity: MainActivity
     lateinit var root: View
+    lateinit var nameTv: TextView
     lateinit var histroyList: ListView
     lateinit var totRun : TextView
     lateinit var totKm : TextView
@@ -59,10 +60,13 @@ class Tab4 : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         root = inflater.inflate(R.layout.fragment_tab4, container, false)
+        nameTv = root.findViewById(R.id.t4_my_name)
         histroyList = root.findViewById(R.id.history_list)
         totRun = root.findViewById(R.id.total_run)
         totKm = root.findViewById(R.id.total_km)
         totPace = root.findViewById(R.id.total_pace)
+
+        nameTv.text = MainActivity.user.name
 
         histroyList!!.setOnItemClickListener { parent, view, position, id ->
             val intent = Intent(mainActivity, historyDetailActivity::class.java)

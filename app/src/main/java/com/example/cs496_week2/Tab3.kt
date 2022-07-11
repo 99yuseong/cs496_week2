@@ -256,7 +256,7 @@ class Tab3 : Fragment() {
         }
 
         var set = BarDataSet(entries,"DataSet") // 데이터셋 초기화
-        set.color = ContextCompat.getColor(requireView().context, R.color.white) // 바 그래프 색 설정
+        set.color = ContextCompat.getColor(requireView().context, R.color.`object`) // 바 그래프 색 설정
 
         val dataSet :ArrayList<IBarDataSet> = ArrayList()
         dataSet.add(set)
