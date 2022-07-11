@@ -235,7 +235,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
             override fun onResponse(call: Call<ArrayList<GroupDT>>, response: Response<ArrayList<GroupDT>>) {
                 if(response.isSuccessful){
                     val groupList = response.body()
-                    val groupListAdapter = GroupListAdapter(groupList!!)
+                    val groupListAdapter = GroupListAdapter(groupList!!, context!!)
                     groupListRv.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
                     groupListRv.adapter = groupListAdapter
                     if(groupList.size > 0) {

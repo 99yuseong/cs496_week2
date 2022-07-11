@@ -39,6 +39,7 @@ class AddFriendPopup(context: Context) {
                         MainActivity.user.friends.add(response.body()!!.message)
                         friendList.add(searchResult[position])
                         friendListAdapter.notifyDataSetChanged()
+                        dialog.dismiss()
                         Toast.makeText(context,"New friend added", Toast.LENGTH_SHORT)
                     }
                 }

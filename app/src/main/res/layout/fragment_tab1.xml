@@ -14,13 +14,12 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/group_list"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/groupToolbar" />
+            android:layout_height="85dp" />
 
         <com.naver.maps.map.MapView
             android:id="@+id/map"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-        </com.naver.maps.map.MapView>
+            android:layout_height="match_parent"></com.naver.maps.map.MapView>
 
         <LinearLayout
             android:id="@+id/runningInfo"

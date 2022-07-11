@@ -1,5 +1,6 @@
 package com.example.cs496_week2
 
+import android.Manifest
 import android.app.Application
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -29,7 +30,6 @@ import java.net.Socket
 
 class MainActivity : AppCompatActivity() {
     lateinit var kakaoAccount: KakaoAccount
-    val serverUrl = "http://172.10.5.172:80"
 
     private lateinit var binding: ActivityMainBinding
 
@@ -38,15 +38,14 @@ class MainActivity : AppCompatActivity() {
 
         val intent = intent
         kakaoAccount = intent.getSerializableExtra("kakaoAccount") as KakaoAccount
-        Log.i("KAKAO", kakaoAccount.toString())
         kakaoUser = kakaoAccount
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val toolbar: Toolbar = findViewById(R.id.my_toolbar)
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
+//        val toolbar: Toolbar = findViewById(R.id.my_toolbar)
+//        setSupportActionBar(toolbar)
+//        supportActionBar?.setDisplayShowTitleEnabled(false)
 
         binding.viewpager.apply {
             adapter = MyPagerAdapter(context as FragmentActivity)
@@ -66,19 +65,19 @@ class MainActivity : AppCompatActivity() {
                 super.onPageSelected(position)
                 when (position) {
                     0-> {
-                        toolbar.title = "Running"
+//                        toolbar.title = "Running"
                         binding.viewpager.isUserInputEnabled = false;
                     }
                     1-> {
-                        toolbar.title = "Friends"
+//                        toolbar.title = "Friends"
                         binding.viewpager.isUserInputEnabled = true;
                     }
                     2-> {
-                        toolbar.title = "Groups"
+//                        toolbar.title = "Groups"
                         binding.viewpager.isUserInputEnabled = true;
                     }
                     3-> {
-                        toolbar.title = "Records"
+//                        toolbar.title = "Records"
                         binding.viewpager.isUserInputEnabled = true;
                     }
                 }

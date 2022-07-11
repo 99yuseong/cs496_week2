@@ -53,4 +53,5 @@
         android:text="create"
         app:layout_constraintBottom_toTopOf="@+id/cg2_selected_list"
         app:layout_constraintEnd_toEndOf="@+id/cg2_selected_list" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

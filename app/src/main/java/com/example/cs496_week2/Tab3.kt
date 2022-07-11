@@ -1,5 +1,11 @@
 package com.example.cs496_week2
 
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -7,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -80,10 +87,7 @@ class Tab3 : Fragment() {
         paceTv = root.findViewById<TextView>(R.id.t3_pace)
         rankingChart = root.findViewById(R.id.ranking_chart)
 
-
-
-
-        val groupListAdapter = GroupListAdapter(ArrayList())
+        val groupListAdapter = GroupListAdapter(ArrayList(), this.requireContext())
         groupListRv.layoutManager = LinearLayoutManager(this.context, LinearLayoutManager.HORIZONTAL, false)
         groupListRv.adapter = groupListAdapter
 
@@ -91,10 +95,10 @@ class Tab3 : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        initGroupList()
+        initGroupList(this.requireContext())
     }
 
-    fun initGroupList() {
+    fun initGroupList(context: Context) {
         service.getGroup(MainActivity.user.id).enqueue(object : Callback<ArrayList<GroupDT>> {
             override fun onResponse(
                 call: Call<ArrayList<GroupDT>>,
@@ -102,7 +106,7 @@ class Tab3 : Fragment() {
             ) {
                 if (response.isSuccessful) {
                     groupList = response.body()!!
-                    val groupListAdapter = GroupListAdapter(groupList)
+                    val groupListAdapter = GroupListAdapter(groupList, context)
                     groupListRv.adapter = groupListAdapter
                     groupListAdapter.setItemClickListener(object :
                         GroupListAdapter.OnItemClickListener {
@@ -110,7 +114,7 @@ class Tab3 : Fragment() {
                             setPage(groupList[position])
                         }
                     })
-
+                    this
                     createGroupBtn.setOnClickListener { view ->
                         val popup = CreateGroupPopup(view.context)
                         popup.showDialog(groupList, groupListAdapter)
@@ -276,7 +280,6 @@ class Tab3 : Fragment() {
             return names.getOrNull(value.toInt()-1) ?: value.toString()
         }
     }
-
 
     companion object {
         /**
