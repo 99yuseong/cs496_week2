@@ -37,6 +37,13 @@ class historyListAdapter(private val histories: MutableList<RunningData>, privat
         var dist : TextView? = convertView?.findViewById(R.id.history_distance)
         var pace : TextView? = convertView?.findViewById(R.id.history_pace)
 
+        val startDateCorrection = Calendar.getInstance()
+        val endDateCorrection = Calendar.getInstance()
+        startDateCorrection.time = history.startDate
+        endDateCorrection.time = history.endDate
+        startDateCorrection.add(Calendar.HOUR, -9)
+        endDateCorrection.add(Calendar.HOUR, -9)
+
         val dateFormatter = SimpleDateFormat("yyyy.MM.dd.", Locale.getDefault())
         val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
 
@@ -49,11 +56,11 @@ class historyListAdapter(private val histories: MutableList<RunningData>, privat
 
         if (date != null) {
             Log.d("date", history.startDate.toString())
-            date.setText(dateFormatter.format(history.startDate))
+            date.setText(dateFormatter.format(startDateCorrection.time))
         }
 
         if (time != null) {
-            time.setText("${timeFormatter.format(history.startDate)} ~ ${timeFormatter.format(history.endDate)}")
+            time.setText("${timeFormatter.format(startDateCorrection.time)} ~ ${timeFormatter.format(endDateCorrection.time)}")
         }
 
         if (dist != null) {

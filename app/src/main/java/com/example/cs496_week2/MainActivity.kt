@@ -53,7 +53,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         TabLayoutMediator(binding.tabs, binding.viewpager) { tab, position ->
-            tab.text = "Title $position"
             when (position) {
                 0 -> tab.setIcon(R.drawable.ic_launcher_background)
                 1 -> tab.setIcon(R.drawable.ic_launcher_background)

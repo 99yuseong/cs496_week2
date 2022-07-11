@@ -51,7 +51,6 @@ class FriendListAdapter(val context: Context, val friendList: ArrayList<UserDT>)
             }
 
             override fun onFailure(call: Call<ArrayList<RunningData>>, t: Throwable) {
-                TODO("Not yet implemented")
             }
         })
 

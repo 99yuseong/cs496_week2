@@ -3,10 +3,7 @@ package com.example.cs496_week2
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Color
-import android.graphics.PointF
+import android.graphics.*
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
@@ -29,6 +26,7 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.tabs.TabLayout
 import com.google.gson.Gson
 import com.naver.maps.geometry.LatLng
+import com.naver.maps.geometry.LatLngBounds
 import com.naver.maps.map.*
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
@@ -53,6 +51,7 @@ import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.abs
 import kotlin.collections.ArrayList
+import kotlin.concurrent.schedule
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -198,13 +197,19 @@ class Tab1 : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(@NonNull naverMap: NaverMap) {
         this.naverMap = naverMap
+        naverMap.setLayerGroupEnabled(NaverMap.LAYER_GROUP_BUILDING, false)
+//        naverMap.setLayerGroupEnabled(NaverMap.LAYER_GROUP_TRANSIT, true)
+//        naverMap.setLayerGroupEnabled(NaverMap.LAYER_GROUP_BUILDING, true)
+//        naverMap.setLayerGroupEnabled(NaverMap.LAYER_GROUP_TRAFFIC, true)
+//        naverMap.setLayerGroupEnabled(NaverMap.LAYER_GROUP_TRANSIT, true)
+//        naverMap.setLayerGroupEnabled(NaverMap.LAYER_GROUP_TRANSIT, true)
         val uiSettings = naverMap.uiSettings
         naverMap.locationSource = locationSource
 //        locationOverlay = naverMap.locationOverlay
         naverMap.locationTrackingMode = LocationTrackingMode.Follow
         naverMap.mapType = NaverMap.MapType.Navi
 //        uiSettings.isZoomControlEnabled = false
-//        naverMap.isNightModeEnabled = true
+        naverMap.isNightModeEnabled = true
 
 //        var imageUrl = MainActivity.kakaoUser.profileUrl
 //        CoroutineScope(Dispatchers.Main).launch {
@@ -241,7 +246,6 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                     }
                     groupListAdapter.setItemClickListener(object: GroupListAdapter.OnItemClickListener {
                         override fun onClick(v: View, position: Int) {
-                            Log.d("click", groupList[position].groupName)
                             if(currentRoom == groupList[position].groupName) {
                                 if(currentRoom == " ") {
                                     currentRoom = MainActivity.user._id
@@ -290,25 +294,6 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                     friendsMarker[id] = Marker()
                 }
             }
-            Log.d("groupList", runningGroupList.toString())
-            Log.d("markers", friendsMarker[id].toString())
-
-//            if (runningGroupList.size == 0 && id.toLong() != MainActivity.kakaoUser.id) {
-//                runningGroupList.add(LocationDT(id.toLong(), room, lat.toDouble(), lon.toDouble(), imgUrl, name))
-//                friendsMarker[id] = Marker()
-//            } else {
-//                for (i in 0 until runningGroupList.size) {
-//                    if(id.toLong() == runningGroupList[i].id) {
-//                        inFriendList = true
-//                        runningGroupList[i].lat = lat.toDouble()
-//                        runningGroupList[i].lon = lon.toDouble()
-//                    }
-//                }
-//                if(!inFriendList && id.toLong() != MainActivity.kakaoUser.id) {
-//                    runningGroupList.add(LocationDT(id.toLong(), room, lat.toDouble(), lon.toDouble(), imgUrl, name))
-//                    friendsMarker[id] = Marker()
-//                }
-//            }
         })
         mSocket.on("endRun", Emitter.Listener {
             var jObject = JSONObject(it[0].toString())
@@ -324,9 +309,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
             }
         })
         mSocket.on("goOut", Emitter.Listener {
-            Log.d("goOutUser", it[0].toString())
             var id = it[0].toString()
-            Log.d("fordeleteMarker", friendsMarker[id].toString())
             if (friendsMarker.size > 0 && friendsMarker[id] != null){
                 toRemoveFriendsMarker.add(friendsMarker[id]!!)
                 friendsMarker.remove(id)
@@ -547,7 +530,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
             // 부분 거리 리스트
             // 부분 거리 리스트
             // 평균 페이스
-            if(dist < 0.001) {
+            if(dist < 1) {
                 avgPace = 1500.0
             } else {
                 avgPace = time / (dist / 1000.0)
@@ -596,10 +579,21 @@ class Tab1 : Fragment(), OnMapReadyCallback {
             override fun onResponse(call: Call<ResponseDT>, response: Response<ResponseDT>) {
                 MainActivity.user.running.add(response.body()!!.message)
                 // 카메라 이동
-                var center = LatLng(totLat / path.size, totLon / path.size)
-                val cameraUpdate = CameraUpdate.scrollTo(LatLng(center.latitude, center.longitude))
-                    .pivot(PointF(0.5f, 0.5f)).animate(CameraAnimation.Fly, 500)
-                naverMap.moveCamera(cameraUpdate)
+                naverMap.minZoom = 5.0
+                naverMap.maxZoom = 18.0
+                val latLngBounds = LatLngBounds.Builder()
+                for(i in 0..pathTmp.size-1) {
+                    latLngBounds.include(pathTmp[i])
+                }
+                val bounds=latLngBounds.build()
+                val padding= 100
+                val updated= CameraUpdate.fitBounds(bounds, padding).animate(CameraAnimation.Fly, 500)
+                naverMap.moveCamera(updated)
+                naverMap.addOnCameraIdleListener {
+                    Timer().schedule(1000) {
+                        naverMap.moveCamera(updated)
+                    }
+                }
             }
             override fun onFailure(call: Call<ResponseDT>, t: Throwable) {
                 Log.d("failed", "fail")
@@ -648,6 +642,24 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         pathLine.capType = PolylineOverlay.LineCap.Round
     }
 
+    fun getRoundedCornerBitmap(bitmap: Bitmap): Bitmap? {
+        val output = Bitmap.createBitmap(
+            bitmap.width,
+            bitmap.height, Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(output)
+        val color = -0xbdbdbe
+        val paint = Paint()
+        val rect = Rect(0, 0, bitmap.width, bitmap.height)
+        paint.isAntiAlias = true
+        canvas.drawARGB(0, 0, 0, 0)
+        paint.color = color
+        canvas.drawCircle(bitmap.width/2f, bitmap.height/2f, bitmap.width/2f, paint)
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
+        canvas.drawBitmap(bitmap, rect, rect, paint)
+        return output
+    }
+
     private fun friendMarker(idx: Int){
         var friendMarker = friendsMarker[runningGroupList[idx]._id]
         var imageUrl = runningGroupList[idx].imgUrl
@@ -658,7 +670,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
             if (friendMarker != null && runningGroupList.size > 0 && bitmap != null) {
                 friendMarker.position = LatLng(runningGroupList[idx].lat, runningGroupList[idx].lon)
                 friendMarker.map = naverMap
-                friendMarker.icon = OverlayImage.fromBitmap(bitmap!!)
+                friendMarker.icon = getRoundedCornerBitmap(bitmap)?.let { OverlayImage.fromBitmap(it) }!!
                 friendMarker.captionText = runningGroupList[idx].name
 //            friendMarker.zIndex = 100
             }

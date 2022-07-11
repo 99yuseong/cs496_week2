@@ -7,4 +7,22 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="pace_over_15">#4D90D500</color>
+    <color name="pace_15_to_13">#4D9FD702</color>
+    <color name="pace_13_to_11">#4DACD70A</color>
+    <color name="pace_11_to_9">#4DBAD711</color>
+    <color name="pace_9_to_8">#4DC8D715</color>
+    <color name="pace_8_to_7.5">#4DD7D81C</color>
+    <color name="pace_7.5_to_7.0">#4DE4D822</color>
+    <color name="pace_7.0_to_6.5">#4DF2D825</color>
+    <color name="pace_6.5_to_6.0">#4DFFD82C</color>
+    <color name="pace_6.0_to_5.5">#4DFDBA2A</color>
+    <color name="pace_5.5_to_5.0">#4DFF9B29</color>
+    <color name="pace_5.0_to_4.5">#4DFE7D26</color>
+    <color name="pace_4.5_to_4.0">#4DFD5C24</color>
+    <color name="pace_4.0_to_3.5">#4DFB3F21</color>
+    <color name="pace_3.5_to_3.0">#4DFC1E1E</color>
+    <color name="pace_under_3.0">#4DFB001B</color>
+
+
 </resources>
