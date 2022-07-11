@@ -36,10 +36,10 @@ class AddFriendPopup(context: Context) {
             service.getAddFriend(MainActivity.user._id, searchResult[position]._id).enqueue(object : Callback<ResponseDT> {
                 override fun onResponse(call: Call<ResponseDT>?, response: Response<ResponseDT>?) {
                     if(response!!.isSuccessful) {
-                        Log.d("new friend", response.body()!!.message)
                         MainActivity.user.friends.add(response.body()!!.message)
                         friendList.add(searchResult[position])
                         friendListAdapter.notifyDataSetChanged()
+                        Toast.makeText(context,"New friend added", Toast.LENGTH_SHORT)
                     }
                 }
 

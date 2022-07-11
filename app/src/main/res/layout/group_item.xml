@@ -9,6 +9,7 @@
         android:id="@+id/tab1_group_cardView"
         android:layout_width="50dp"
         android:layout_height="50dp"
+        app:cardBackgroundColor="#181818"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -20,7 +21,9 @@
                 android:id="@+id/gi_group_name"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
+                android:fontFamily="sans-serif-condensed-light"
                 android:text="TextView"
+                android:textColor="@color/white"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

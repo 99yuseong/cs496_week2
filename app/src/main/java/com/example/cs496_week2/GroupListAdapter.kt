@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class GroupListAdapter(private val groupList: ArrayList<GroupDT>): RecyclerView.Adapter<GroupListAdapter.MyViewHolder>() {
+class GroupListAdapter(var groupList: ArrayList<GroupDT>): RecyclerView.Adapter<GroupListAdapter.MyViewHolder>() {
     private lateinit var itemClickListener : OnItemClickListener
 
     inner class MyViewHolder(itemView: View?): RecyclerView.ViewHolder(itemView!!) {

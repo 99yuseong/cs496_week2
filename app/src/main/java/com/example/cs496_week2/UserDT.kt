@@ -45,3 +45,11 @@ data class GroupDT (
     val groupName: String,
     val member: ArrayList<String>
 )
+
+data class RunningStatisticDT (
+    val id: String,
+    val name: String,
+    val runs: Int,
+    val dist: Double,
+    val avgPace: Double
+)

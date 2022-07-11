@@ -4,10 +4,7 @@ import android.app.Dialog
 import android.content.Context
 import android.util.Log
 import android.view.WindowManager
-import android.widget.Button
-import android.widget.ListView
-import android.widget.SearchView
-import android.widget.TextView
+import android.widget.*
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,7 +18,7 @@ class CreateGroupPopup(context: Context) {
     val context = context
     private val dialog = Dialog(context)
 
-    fun changeDialog(selectedList: ArrayList<UserDT>) {
+    fun changeDialog(selectedList: ArrayList<UserDT>, groupList: ArrayList<GroupDT>, groupListAdapter: GroupListAdapter) {
         dialog.setContentView(R.layout.create_group_popup2)
 
         val selectedListRv = dialog.findViewById<RecyclerView>(R.id.cg2_selected_list)
@@ -43,20 +40,23 @@ class CreateGroupPopup(context: Context) {
             service.postCreateGroup(newGroup).enqueue(object : Callback<GroupDT> {
                 override fun onResponse(call: Call<GroupDT>, response: Response<GroupDT>) {
                     if(response.isSuccessful) {
-                        MainActivity.user.group.add(response.body()!!._id)
-                        Log.d("group", MainActivity.user.group.toString())
+                        val newGroup = response.body()
+                        MainActivity.user.group.add(newGroup!!._id)
+                        groupList.add(newGroup)
+                        groupListAdapter.notifyDataSetChanged()
                     }
                 }
                 override fun onFailure(call: Call<GroupDT>, t: Throwable) {
                 }
             })
+            Toast.makeText(context,"New group created", Toast.LENGTH_LONG)
             dialog.dismiss()
         }
 
 
     }
 
-    fun showDialog() {
+    fun showDialog(groupList: ArrayList<GroupDT>, groupListAdapter: GroupListAdapter) {
         dialog.setContentView(R.layout.create_group_popup1)
         dialog.window!!.setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT)
         dialog.setCanceledOnTouchOutside(true)
@@ -113,7 +113,7 @@ class CreateGroupPopup(context: Context) {
         }
 
         nextBtn.setOnClickListener { view ->
-            changeDialog(selectedList)
+            changeDialog(selectedList, groupList, groupListAdapter)
         }
 
 

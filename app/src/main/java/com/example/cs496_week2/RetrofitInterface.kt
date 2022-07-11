@@ -9,9 +9,9 @@ import retrofit2.http.*
 class RetrofitInterface {
 
     companion object {
-        val serverUrl = "http://192.249.19.179:80"
+        private val serverUrl = "http://192.249.19.179:80"
 
-        val retrofit = Retrofit.Builder()
+        private val retrofit = Retrofit.Builder()
             .baseUrl(serverUrl)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -89,5 +89,9 @@ class RetrofitInterface {
             @Query("id") id: Long
         ) : Call<ArrayList<GroupDT>>
 
+        @GET("/group/member")
+        fun getGroupMember(
+            @Query("groupId") id: String
+        ) : Call<ArrayList<UserDT>>
     }
 }

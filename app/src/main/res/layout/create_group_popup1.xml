@@ -13,6 +13,7 @@
         android:fontFamily="sans-serif-condensed-medium"
         android:text="Create Group"
         android:textSize="20sp"
+        android:textColor="#000000"
         app:layout_constraintStart_toStartOf="@+id/cg_search_name"
         app:layout_constraintTop_toTopOf="parent" />
 
