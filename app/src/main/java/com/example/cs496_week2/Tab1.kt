@@ -48,8 +48,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okio.BufferedSink
 import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.Call
@@ -424,7 +427,7 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         0
                     )
-
+                    captureBtn.visibility = View.GONE
                 } else {
                     pause()
                 }
@@ -595,15 +598,8 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
                     }, 3000)
                 }
 
-                captureBtn.setOnClickListener {
-                    naverMap.takeSnapshot(false, this@Tab1)
-                }
-
-
-                /// 캡쳐 버튼 보이게
-
-
-
+                naverMap.takeSnapshot(false, this@Tab1)
+                captureBtn.visibility = View.VISIBLE
             }
             override fun onFailure(call: Call<ResponseDT>, t: Throwable) {
                 Log.d("failed", "fail")
@@ -721,7 +717,10 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
 
     override fun onSnapshotReady(bitmap: Bitmap) {
         Log.d("snap", bitmap.toString())
-        saveImageToGallery(bitmap)
+        captureBtn.setOnClickListener {
+            saveImageToGallery(bitmap)
+        }
+        changeBitmapMultipartBody(bitmap, mainActivity)
     }
 
     fun changePathtpMultipartBody(path: Uri?, context : Context) {
@@ -732,13 +731,30 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
         var result = c?.getString(index!!)
         val file = File(result!!)
 
-        val requestFile = RequestBody.create(MediaType.parse("image/jpeg"), file)
+        val requestFile = RequestBody.create("image/jpeg".toMediaTypeOrNull(), file)
         val body = MultipartBody.Part.createFormData("imageFile", file.name, requestFile)
         sendImage(body)
     }
 
+    fun changeBitmapMultipartBody(bitmap: Bitmap, context : Context) {
+        val bitmapRequestBody = bitmap?.let { BitmapRequestBody(it) }
+        val bitmapMultipartBody: MultipartBody.Part? =
+            if (bitmapRequestBody == null) null
+            else MultipartBody.Part.createFormData("imageFile", curRunningData._id + ".jpg", bitmapRequestBody)
+
+//        val body = MultipartBody.Part.createFormData("imageFile", file.name, requestFile)
+        sendImage(bitmapMultipartBody!!)
+    }
+
+    inner class BitmapRequestBody(private val bitmap: Bitmap) : RequestBody() {
+        override fun contentType(): MediaType = "image/jpeg".toMediaType()
+        override fun writeTo(sink: BufferedSink) {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 99, sink.outputStream())
+        }
+    }
+
     fun sendImage(image : MultipartBody.Part) {
-        val requestBody: RequestBody = RequestBody.create(MediaType.parse("text/plain"), curRunningData._id)
+        val requestBody: RequestBody = RequestBody.create("text/plain".toMediaTypeOrNull(), curRunningData._id)
         val call = service.captureSend(requestBody, image) //통신 API 패스 설정
         call.enqueue(object : Callback<String>{
             override fun onResponse(call: Call<String>, response: Response<String>) {
@@ -776,6 +792,7 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
             return false
         }
         Toast.makeText(activity, "그림이 갤러리에 저장되었습니다", Toast.LENGTH_SHORT).show()
+        captureBtn.visibility = View.GONE
         return true
     }
 
@@ -817,21 +834,21 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
                     )
                 )
 
-                val cursor = context.contentResolver.query(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    null,
-                    "_data = '" + rootPath + dirName + "/" + fileName+ "'",
-                    null,
-                    null
-                )
-
-                cursor!!.moveToNext()
-                val id = cursor!!.getInt(cursor!!.getColumnIndex("_id"))
-                val uri = ContentUris.withAppendedId(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    id.toLong()
-                )
-                changePathtpMultipartBody(uri, mainActivity)
+//                val cursor = context.contentResolver.query(
+//                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+//                    null,
+//                    "_data = '" + rootPath + dirName + "/" + fileName+ "'",
+//                    null,
+//                    null
+//                )
+//
+//                cursor!!.moveToNext()
+//                val id = cursor!!.getInt(cursor!!.getColumnIndex("_id"))
+//                val uri = ContentUris.withAppendedId(
+//                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+//                    id.toLong()
+//                )
+//                changePathtpMultipartBody(uri, mainActivity)
                 return true
             } catch (e: Exception) {
                 e.printStackTrace()

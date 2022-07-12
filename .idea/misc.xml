@@ -10,6 +10,7 @@
         <entry key="app/src/main/res/drawable/ic_round_pause_24.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_round_play_arrow_24.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_round_stop_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_shoes.xml" value="0.335" />
         <entry key="app/src/main/res/drawable/round.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/roundbackgorund.xml" value="0.1" />
         <entry key="app/src/main/res/layout-w1240dp/activity_login.xml" value="0.1" />
@@ -17,10 +18,21 @@
         <entry key="app/src/main/res/layout/activity_history_detail_temp.xml" value="0.26019287109375006" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.45892333984375" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_title.xml" value="0.1" />
         <entry key="app/src/main/res/layout/add_friend_popup.xml" value="0.10562310030395136" />
         <entry key="app/src/main/res/layout/create_group_popup.xml" value="0.1" />
         <entry key="app/src/main/res/layout/create_group_popup1.xml" value="0.58380126953125" />
         <entry key="app/src/main/res/layout/create_group_popup2.xml" value="0.7173179294752039" />
+        <entry key="app/src/main/res/layout/fragment_my.xml" value="0.12943262411347517" />
+        <entry key="app/src/main/res/layout/fragment_tab1.xml" value="0.21236559139784947" />
+        <entry key="app/src/main/res/layout/fragment_tab2.xml" value="0.15625" />
+        <entry key="app/src/main/res/layout/fragment_tab3.xml" value="0.24864130434782608" />
+        <entry key="app/src/main/res/layout/fragment_tab4.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_tab4_temp.xml" value="0.35615081787109376" />
+        <entry key="app/src/main/res/layout/friend_item.xml" value="0.1037037037037037" />
+        <entry key="app/src/main/res/layout/group_item.xml" value="0.5425160725911459" />
+        <entry key="app/src/main/res/layout/group_select_item.xml" value="0.7140423982039743" />
+        <entry key="app/src/main/res/layout/history_item.xml" value="0.33177083333333335" />
         <entry key="app/src/main/res/layout/fragment_my.xml" value="0.12943262411347517" />
         <entry key="app/src/main/res/layout/fragment_tab1.xml" value="0.24476229539558075" />
         <entry key="app/src/main/res/layout/fragment_tab2.xml" value="0.38494110107421875" />
