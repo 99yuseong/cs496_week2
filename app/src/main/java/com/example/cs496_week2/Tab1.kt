@@ -216,22 +216,10 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
         naverMap.setLayerGroupEnabled(NaverMap.LAYER_GROUP_BUILDING, false)
         val uiSettings = naverMap.uiSettings
         naverMap.locationSource = locationSource
-//        locationOverlay = naverMap.locationOverlay
         naverMap.locationTrackingMode = LocationTrackingMode.Follow
         naverMap.mapType = NaverMap.MapType.Navi
-//        uiSettings.isZoomControlEnabled = false
+        uiSettings.isZoomControlEnabled = false
         naverMap.isNightModeEnabled = true
-
-//        var imageUrl = MainActivity.kakaoUser.profileUrl
-//        CoroutineScope(Dispatchers.Main).launch {
-//            val bitmap = withContext(Dispatchers.IO) {
-//                ImageLoader.loadImage(imageUrl!!)
-//            }
-//            marker.icon = OverlayImage.fromBitmap(bitmap!!)
-//            marker.captionText = MainActivity.kakaoUser.nickname!!
-//            marker.zIndex = 100
-//        }
-
     }
 
     override fun onStart() {
@@ -508,22 +496,12 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
             totLat += mLastLocation.latitude
             totLon += mLastLocation.longitude
             // 부분 거리
-//            Log.d("mLat", mLastLocation.latitude.toString())
-//            Log.d("mLon", mLastLocation.longitude.toString())
-//            Log.d("dist", dist.toString())
-//            Log.d("subDist", subDist.toString())
             subDist = calDist(
                 prvCoord.latitude,
                 prvCoord.longitude,
                 mLastLocation.latitude,
                 mLastLocation.longitude
             )
-//            Log.d("prvLat", prvCoord.latitude.toString())
-//            Log.d("prvLon", prvCoord.longitude.toString())
-//            Log.d("dist", dist.toString())
-//            Log.d("subDist", subDist.toString())
-//            Log.d("dist", dist.toString())
-//            Log.d("subDist", subDist.toString())
             // 시간
             time ++
             // 총 거리
@@ -536,10 +514,6 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
             } else {
                 dist += subDist
             }
-//            Log.d("dist", dist.toString())
-//            Log.d("subDist", subDist.toString())
-            // 부분 거리 리스트
-            // 부분 거리 리스트
             // 평균 페이스
             if(dist < 1) {
                 avgPace = 1500.0
@@ -548,7 +522,20 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
             } else {
                 avgPace = time / (dist / 1000.0)
             }
-            subDistList.add((avgPace) / 60.0 * (-1))
+            if(subDistList.size > 2) {
+                if((1 / (subDist / 1000.0)) > 1500 || (1 / (subDist / 1000.0)) < 0) {
+                    subDistList.add(((1500 / 60.0 * (-1)) + subDistList[subDistList.size -1] + subDistList[subDistList.size -2])/3.0)
+                } else {
+                    subDistList.add((((1 / (subDist / 1000.0)) / 60.0 * (-1)) + subDistList[subDistList.size -1] + subDistList[subDistList.size -2])/3.0)
+                }
+
+            } else {
+                if((1 / (subDist / 1000.0)) > 1500 || (1 / (subDist / 1000.0)) < 0) {
+                    subDistList.add(1500 / 60.0 * (-1))
+                } else {
+                    subDistList.add((1 / (subDist / 1000.0)) / 60.0 * (-1))
+                }
+            }
             // 지도상 경로 그리기
             linePath()
             prvCoord = LatLng(mLastLocation.latitude, mLastLocation.longitude)
@@ -599,8 +586,7 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
                     latLngBounds.include(pathTmp[i])
                 }
                 val bounds=latLngBounds.build()
-                val padding= 100
-                val updated= CameraUpdate.fitBounds(bounds, padding).animate(CameraAnimation.Fly, 500)
+                val updated= CameraUpdate.fitBounds(bounds, 100,300, 100,300).animate(CameraAnimation.Fly, 500)
                 naverMap.moveCamera(updated)
                 naverMap.addOnCameraIdleListener {
                     Handler(Looper.getMainLooper()).postDelayed({
@@ -660,7 +646,7 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
     private fun linePath() {
         pathLine.coords = path
         pathLine.width = 30
-        pathLine.color = Color.BLUE
+        pathLine.color = Color.YELLOW
         pathLine.map = naverMap
         pathLine.joinType = PolylineOverlay.LineJoin.Round
         pathLine.capType = PolylineOverlay.LineCap.Round

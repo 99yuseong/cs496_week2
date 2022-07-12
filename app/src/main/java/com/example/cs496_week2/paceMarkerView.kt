@@ -32,7 +32,7 @@ class paceMarkerView : MarkerView{
             tPaceMin = (pace / 60).toInt()
             tPaceSec = (pace % 60).toInt()
         }
-        tvContent.setText("${if(tPaceMin > 20 || tPaceMin > 0) 20 else tPaceMin}' ${if(tPaceSec >= 10) tPaceSec else "0${tPaceSec}"}''")
+        tvContent.setText("${if(tPaceMin > 20 || tPaceMin < 0) 20 else tPaceMin}' ${if(tPaceSec >= 10) tPaceSec else "0${tPaceSec}"}''")
         super.refreshContent(e, highlight)
     }
 }

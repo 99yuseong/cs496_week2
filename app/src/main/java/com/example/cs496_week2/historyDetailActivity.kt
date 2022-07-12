@@ -176,6 +176,9 @@ class historyDetailActivity : AppCompatActivity(),OnMapReadyCallback {
 
     override fun onMapReady(naverMap: NaverMap) {
         this.naverMap = naverMap
+        val uiSettings = naverMap.uiSettings
+        naverMap.mapType = NaverMap.MapType.Navi
+        uiSettings.isZoomControlEnabled = false
     }
 
     private fun linePath() {
@@ -227,7 +230,7 @@ class historyDetailActivity : AppCompatActivity(),OnMapReadyCallback {
             val input = runningData.subDist
             Log.d("subdist", runningData.subDist.toString())
             val entries: ArrayList<Entry> = ArrayList()
-            entries.add(Entry(0F, 0F))
+//            entries.add(Entry(0F, 0F))
             val dataset: LineDataSet = LineDataSet(entries, "Pace")
             val data: LineData = LineData(dataset)
             dataset.lineWidth = 5f
@@ -275,25 +278,26 @@ class historyDetailActivity : AppCompatActivity(),OnMapReadyCallback {
             yAxisLeft.textColor = Color.rgb(163, 163, 163)
             yAxisLeft.setDrawAxisLine(false)
 //            yAxisLeft.axisLineWidth = 2f
-            yAxisLeft.axisMinimum = -40f // 최솟값
-            yAxisLeft.axisMaximum = -3f
+            yAxisLeft.axisMinimum = -25f // 최솟값
+            yAxisLeft.axisMaximum = 0f
 
             // YAxis(Left) (오른쪽) - 선 유무, 데이터 최솟값/최댓값, 색상
             val yAxis = chart.axisRight
             yAxis.setDrawLabels(false) // label 삭제
             yAxis.textColor = Color.rgb(163, 163, 163)
             yAxis.setDrawAxisLine(false)
+            yAxis.setDrawGridLines(false)
 //            yAxis.axisLineWidth = 180f
-            yAxis.axisMinimum = -40f // 최솟값
-            yAxis.axisMaximum = -3f
+            yAxis.axisMinimum = -25f // 최솟값
+            yAxis.axisMaximum = 0f
 
             runOnUiThread {
                 // 그래프 생성
-                chart.animateXY(1, 1)
+                chart.animateXY(100, 100)
             }
 
             for (i in 0 until input.size){
-                SystemClock.sleep(1)
+                SystemClock.sleep(3)
                 data.addEntry(Entry(i.toFloat(), input[i].toFloat()), 0)
                 data.notifyDataChanged()
                 chart.notifyDataSetChanged()
