@@ -15,7 +15,7 @@
             android:id="@+id/group_list"
             android:layout_width="match_parent"
             android:layout_height="@dimen/groupToolbar"
-            android:background="@color/dark"
+            android:background="#00000000"
             android:paddingStart="5dp"
             android:paddingTop="5dp" />
 

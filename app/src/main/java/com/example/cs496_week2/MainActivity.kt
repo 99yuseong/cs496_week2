@@ -53,10 +53,10 @@ class MainActivity : AppCompatActivity() {
 
         TabLayoutMediator(binding.tabs, binding.viewpager) { tab, position ->
             when (position) {
-                0 -> tab.setIcon(R.drawable.ic_launcher_background)
-                1 -> tab.setIcon(R.drawable.ic_launcher_background)
-                2 -> tab.setIcon(R.drawable.ic_launcher_background)
-                3 -> tab.setIcon(R.drawable.ic_launcher_background)
+                0 -> tab.setIcon(R.drawable.directions_run)
+                1 -> tab.setIcon(R.drawable.group)
+                2 -> tab.setIcon(R.drawable.groups)
+                3 -> tab.setIcon(R.drawable.account_circle)
             }
         }.attach()
 

@@ -1,6 +1,7 @@
 package com.example.cs496_week2
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import android.location.Geocoder
 import android.util.Log
 import android.view.LayoutInflater
@@ -61,7 +62,8 @@ class historyListAdapter(private val histories: MutableList<RunningData>, privat
                 ImageLoader.loadImage("http://192.249.19.179:80/" + history._id + ".jpg" )
             }
             if (img != null) {
-                img.setImageBitmap(bitmap)
+                val squareBitmap = Bitmap.createBitmap(bitmap!!, 0, (bitmap?.getHeight()-bitmap?.getWidth())/2, bitmap?.getWidth(), bitmap?.getWidth())
+                img.setImageBitmap(squareBitmap)
             }
         }
 

@@ -31,11 +31,11 @@
             android:id="@+id/tabs"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:background="@color/white"
-            app:tabIndicatorColor="@color/design_default_color_primary"
-            app:tabRippleColor="@color/design_default_color_primary"
-            app:tabSelectedTextColor="@color/design_default_color_primary"
-            app:tabTextColor="@color/black" />
+            android:background="@color/dark_item"
+            app:tabIndicatorColor="@color/object"
+            app:tabRippleColor="@color/object"
+            app:tabSelectedTextColor="@color/object"
+            app:tabTextColor="@color/object" />
     </com.google.android.material.appbar.AppBarLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
