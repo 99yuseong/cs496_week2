@@ -123,7 +123,6 @@ class historyDetailActivity : AppCompatActivity(),OnMapReadyCallback {
                     val padding= 100
                     val updated= fitBounds(bounds,padding).animate(CameraAnimation.Fly, 500)
                     naverMap.moveCamera(updated)
-//                naverMap.takeSnapshot()
                     linePath()
                     naverMap.addOnCameraIdleListener {
                         Handler(Looper.getMainLooper()).postDelayed({
@@ -226,6 +225,7 @@ class historyDetailActivity : AppCompatActivity(),OnMapReadyCallback {
     inner class ThreadClass : Thread() {
         override fun run() {
             val input = runningData.subDist
+            Log.d("subdist", runningData.subDist.toString())
             val entries: ArrayList<Entry> = ArrayList()
             entries.add(Entry(0F, 0F))
             val dataset: LineDataSet = LineDataSet(entries, "Pace")
@@ -237,8 +237,8 @@ class historyDetailActivity : AppCompatActivity(),OnMapReadyCallback {
 //            dataset.setDrawCircles(true)
             dataset.setDrawHorizontalHighlightIndicator(false)
             dataset.setDrawVerticalHighlightIndicator(true)
-            dataset.color = Color.rgb(255, 155, 155)
-            dataset.setCircleColor(Color.rgb(255, 155, 155))
+            dataset.color = Color.rgb(254, 201, 45)
+            dataset.setCircleColor(Color.rgb(254, 201, 45))
             dataset.highLightColor = Color.BLACK
             dataset.highlightLineWidth = 1f
 
@@ -266,8 +266,8 @@ class historyDetailActivity : AppCompatActivity(),OnMapReadyCallback {
             xAxis.granularity = 1f
             xAxis.textSize = 14f
             xAxis.textColor = Color.rgb(118, 118, 118)
-            xAxis.spaceMin = 0.1f // Chart 맨 왼쪽 간격 띄우기
-            xAxis.spaceMax = 0.1f // Chart 맨 오른쪽 간격 띄우기
+            xAxis.spaceMin = 5f // Chart 맨 왼쪽 간격 띄우기
+            xAxis.spaceMax = 5f // Chart 맨 오른쪽 간격 띄우기
 
             // YAxis(Right) (왼쪽) - 선 유무, 데이터 최솟값/최댓값, 색상
             val yAxisLeft = chart.axisLeft
@@ -275,7 +275,7 @@ class historyDetailActivity : AppCompatActivity(),OnMapReadyCallback {
             yAxisLeft.textColor = Color.rgb(163, 163, 163)
             yAxisLeft.setDrawAxisLine(false)
 //            yAxisLeft.axisLineWidth = 2f
-            yAxisLeft.axisMinimum = -30f // 최솟값
+            yAxisLeft.axisMinimum = -40f // 최솟값
             yAxisLeft.axisMaximum = -3f
 
             // YAxis(Left) (오른쪽) - 선 유무, 데이터 최솟값/최댓값, 색상
@@ -284,7 +284,7 @@ class historyDetailActivity : AppCompatActivity(),OnMapReadyCallback {
             yAxis.textColor = Color.rgb(163, 163, 163)
             yAxis.setDrawAxisLine(false)
 //            yAxis.axisLineWidth = 180f
-            yAxis.axisMinimum = -30f // 최솟값
+            yAxis.axisMinimum = -40f // 최솟값
             yAxis.axisMaximum = -3f
 
             runOnUiThread {
@@ -293,7 +293,7 @@ class historyDetailActivity : AppCompatActivity(),OnMapReadyCallback {
             }
 
             for (i in 0 until input.size){
-                SystemClock.sleep(10)
+                SystemClock.sleep(1)
                 data.addEntry(Entry(i.toFloat(), input[i].toFloat()), 0)
                 data.notifyDataChanged()
                 chart.notifyDataSetChanged()

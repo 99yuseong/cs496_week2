@@ -18,14 +18,14 @@ class paceMarkerView : MarkerView{
 
     // draw override를 사용해 marker의 위치 조정 (bar의 상단 중앙)
     override fun draw(canvas: Canvas?) {
-        canvas!!.translate(-(width / 2).toFloat(), -5*height.toFloat() )
+        canvas!!.translate(-(width / 2).toFloat(), 0.0F)
 
         super.draw(canvas)
     }
 
     // entry를 content의 텍스트에 지정
     override fun refreshContent(e: Entry?, highlight: Highlight?) {
-        var pace = e?.y?.times((-1))
+        var pace = e?.y?.times((-60))
         var tPaceMin = 0
         var tPaceSec = 0
         if (pace != null) {

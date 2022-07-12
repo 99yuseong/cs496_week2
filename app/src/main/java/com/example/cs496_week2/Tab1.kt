@@ -12,6 +12,7 @@ import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
@@ -359,6 +360,7 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
         super.onPause()
         mSocket.disconnect()
         mapView.onPause()
+//        timerTask?.cancel()	// timerTask가 null이 아니라면 cancel() 호출
         mSocket.emit("endRunning", MainActivity.user._id)
     }
 
@@ -440,7 +442,7 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
                 }
             }
             stopBtn.setOnClickListener {
-                if (time >= 5) {
+                if (time >= 5 && dist >= 30.0 ) {
                     reset()
                 }
                 isRunning = false
@@ -541,6 +543,8 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
             // 평균 페이스
             if(dist < 1) {
                 avgPace = 1500.0
+            } else if(time / (dist / 1000.0) > 1500){
+                avgPace = 1500.0
             } else {
                 avgPace = time / (dist / 1000.0)
             }
@@ -567,7 +571,6 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
         stopBtn.visibility = View.GONE
         startBtn.setImageResource(R.drawable.ic_round_play_arrow_24)
 //        timerTask?.cancel();	// 안전한 호출(?.)로 timerTask가 null이 아니면 cancel() 호출
-
     }
 
     private fun reset() {
@@ -600,9 +603,10 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
                 val updated= CameraUpdate.fitBounds(bounds, padding).animate(CameraAnimation.Fly, 500)
                 naverMap.moveCamera(updated)
                 naverMap.addOnCameraIdleListener {
-                    Timer().schedule(1000) {
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        //실행할 코드
                         naverMap.moveCamera(updated)
-                    }
+                    }, 3000)
                 }
 
                 captureBtn.setOnClickListener {
@@ -741,8 +745,6 @@ class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
         c?.moveToFirst()
         var result = c?.getString(index!!)
         val file = File(result!!)
-//        val requestBody = RequestBody.create(MediaType.parse("image/jpeg"), file)
-//        val fileToUpload = MultipartBody.Part.createFormData("profile", file.name, requestBody)
 
         val requestFile = RequestBody.create(MediaType.parse("image/jpeg"), file)
         val body = MultipartBody.Part.createFormData("imageFile", file.name, requestFile)
