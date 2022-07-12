@@ -50,7 +50,7 @@ class historyListAdapter(private val histories: MutableList<RunningData>, privat
         startDateCorrection.add(Calendar.HOUR, -9)
         endDateCorrection.add(Calendar.HOUR, -9)
 
-        val dateFormatter = SimpleDateFormat("yyyy.MM.dd.", Locale.getDefault())
+        val dateFormatter = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
         val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
 
         val paceMin = (history.avgPace / 60).toInt()
@@ -79,11 +79,11 @@ class historyListAdapter(private val histories: MutableList<RunningData>, privat
         }
 
         if (dist != null) {
-            dist.setText("${String.format("%.2f", history.dist / 1000.0)} km")
+            dist.setText("${String.format("%.2f", history.dist / 1000.0)}")
         }
 
         if (pace != null) {
-            pace.setText("${if(history.dist < 1) 0 else paceMin}' ${if(paceSec >= 10) paceSec else "0${paceSec}"}''")
+            pace.setText("${if(history.dist < 1) 0 else paceMin}'${if(paceSec >= 10) paceSec else "0${paceSec}"}''")
         }
 
         return convertView

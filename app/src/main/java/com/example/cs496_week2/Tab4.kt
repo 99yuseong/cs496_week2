@@ -104,7 +104,7 @@ class Tab4 : Fragment() {
                     tPaceSec = (tPace % 60).toInt()
                     totRun.setText(serverRunData.size.toString())
                     totKm.setText("${String.format("%.2f", tDist / 1000.0)} km")
-                    totPace.setText("${if(tDist < 1) 0 else tPaceMin}' ${if(tPaceSec >= 10) tPaceSec else "0${tPaceSec}"}''")
+                    totPace.setText("${if(tDist < 1) 0 else tPaceMin}'${if(tPaceSec >= 10) tPaceSec else "0${tPaceSec}"}''")
                 }
             }
             override fun onFailure(call: Call<MutableList<RunningData>>?, t: Throwable?) {
