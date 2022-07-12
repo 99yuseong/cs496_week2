@@ -1,9 +1,12 @@
 package com.example.cs496_week2
 
 import android.icu.text.Transliterator
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.*
 
 class RetrofitInterface {
@@ -14,6 +17,7 @@ class RetrofitInterface {
         private val retrofit = Retrofit.Builder()
             .baseUrl(serverUrl)
             .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(ScalarsConverterFactory.create())
             .build()
 
         val service: RetrofitService = retrofit.create(RetrofitService::class.java)
@@ -93,5 +97,12 @@ class RetrofitInterface {
         fun getGroupMember(
             @Query("groupId") id: String
         ) : Call<ArrayList<UserDT>>
+
+        @Multipart
+        @POST("/running/running_image_upload")
+        fun captureSend(
+            @Part ("runningId")runningId: RequestBody,
+            @Part imageFile : MultipartBody.Part
+        ) : Call<String>
     }
 }

@@ -9,6 +9,12 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import com.naver.maps.geometry.LatLng
+import com.naver.maps.map.overlay.OverlayImage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.Date
@@ -49,6 +55,15 @@ class historyListAdapter(private val histories: MutableList<RunningData>, privat
 
         val paceMin = (history.avgPace / 60).toInt()
         val paceSec = (history.avgPace % 60).toInt()
+
+        CoroutineScope(Dispatchers.Main).launch {
+            val bitmap = withContext(Dispatchers.IO) {
+                ImageLoader.loadImage("http://192.249.19.179:80/" + history._id + ".jpg" )
+            }
+            if (img != null) {
+                img.setImageBitmap(bitmap)
+            }
+        }
 
         if (location != null) {
             location.setText(getLocationName(position))

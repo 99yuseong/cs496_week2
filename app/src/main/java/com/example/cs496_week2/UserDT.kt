@@ -26,6 +26,7 @@ data class LocationDT (
 )
 
 data class RunningData (
+    var _id : String,
     val user: String,
     var startDate: Date,
     var endDate: Date,

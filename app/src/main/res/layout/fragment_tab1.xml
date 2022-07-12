@@ -14,12 +14,19 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/group_list"
             android:layout_width="match_parent"
-            android:layout_height="85dp" />
+            android:layout_height="@dimen/groupToolbar" />
 
         <com.naver.maps.map.MapView
             android:id="@+id/map"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"></com.naver.maps.map.MapView>
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/captureBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_outline_camera_24" />
+        </com.naver.maps.map.MapView>
 
         <LinearLayout
             android:id="@+id/runningInfo"

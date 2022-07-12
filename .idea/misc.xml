@@ -3,9 +3,17 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="app/src/main/res/drawable/button_background.xml" value="0.146" />
-        <entry key="app/src/main/res/drawable/friend_list_item.xml" value="0.1165" />
+        <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_outline_camera_24.xml" value="0.3165" />
+        <entry key="app/src/main/res/drawable/ic_round_directions_run_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_round_pause_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_round_play_arrow_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_round_stop_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/round.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/roundbackgorund.xml" value="0.1" />
         <entry key="app/src/main/res/layout-w1240dp/activity_login.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_history_detail.xml" value="0.27496337890625" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.45892333984375" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.19080505371093748" />
         <entry key="app/src/main/res/layout/add_friend_popup.xml" value="0.2966827392578125" />
@@ -27,6 +35,20 @@
         <entry key="app/src/main/res/layout/search_user_item.xml" value="0.41009388799252716" />
         <entry key="app/src/main/res/layout/selected_friend_item.xml" value="0.3784715735394022" />
         <entry key="app/src/main/res/layout/user_item.xml" value="0.3015258346778759" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/add_friend_popup.xml" value="0.10562310030395136" />
+        <entry key="app/src/main/res/layout/create_group_popup1.xml" value="0.58380126953125" />
+        <entry key="app/src/main/res/layout/create_group_popup2.xml" value="0.7173179294752039" />
+        <entry key="app/src/main/res/layout/fragment_tab1.xml" value="0.24476229539558075" />
+        <entry key="app/src/main/res/layout/fragment_tab2.xml" value="0.15625" />
+        <entry key="app/src/main/res/layout/fragment_tab3.xml" value="0.24864130434782608" />
+        <entry key="app/src/main/res/layout/fragment_tab4.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/friend_item.xml" value="0.1037037037037037" />
+        <entry key="app/src/main/res/layout/group_item.xml" value="0.5425160725911459" />
+        <entry key="app/src/main/res/layout/history_item.xml" value="0.33177083333333335" />
+        <entry key="app/src/main/res/layout/pace_marker_view.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/search_user_item.xml" value="0.1037037037037037" />
+        <entry key="app/src/main/res/layout/selected_friend_item.xml" value="0.1037037037037037" />
       </map>
     </option>
   </component>

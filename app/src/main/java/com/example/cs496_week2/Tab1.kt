@@ -1,14 +1,20 @@
 package com.example.cs496_week2
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.ContentUris
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.database.Cursor
 import android.graphics.*
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.os.Looper
+import android.provider.MediaStore
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +24,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.cs496_week2.databinding.FragmentTab1Binding
@@ -38,25 +46,29 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
-import java.lang.Thread
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
-import kotlin.math.abs
-import kotlin.collections.ArrayList
 import kotlin.concurrent.schedule
+import kotlin.math.abs
+
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
-class Tab1 : Fragment(), OnMapReadyCallback {
+class Tab1 : Fragment(), OnMapReadyCallback, NaverMap.SnapshotReadyCallback {
     private var param1: String? = null
     private var param2: String? = null
 
@@ -73,6 +85,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     internal lateinit var mLocationRequest: LocationRequest // 위치 정보 요청의 매개변수를 저장하는
     private val REQUEST_PERMISSION_LOCATION = 10
     private val LOCATION_PERMISSTION_REQUEST_CODE: Int = 1000
+    private val STRORANGE_EXTERNAL_PERMISSION_REQUEST_CODE: Int = 100
 
     // timer
     private var isRunning = false
@@ -94,6 +107,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     //btns
     lateinit var startBtn: ImageView
     lateinit var stopBtn: ImageView
+    lateinit var captureBtn: ImageView
 
     // running DATA list
 //    private var firstRunning: Boolean = true
@@ -177,6 +191,7 @@ class Tab1 : Fragment(), OnMapReadyCallback {
 
         startBtn = root.findViewById(R.id.start)
         stopBtn = root.findViewById(R.id.stop)
+        captureBtn = root.findViewById(R.id.captureBtn)
 
         return root
     }
@@ -198,11 +213,6 @@ class Tab1 : Fragment(), OnMapReadyCallback {
     override fun onMapReady(@NonNull naverMap: NaverMap) {
         this.naverMap = naverMap
         naverMap.setLayerGroupEnabled(NaverMap.LAYER_GROUP_BUILDING, false)
-//        naverMap.setLayerGroupEnabled(NaverMap.LAYER_GROUP_TRANSIT, true)
-//        naverMap.setLayerGroupEnabled(NaverMap.LAYER_GROUP_BUILDING, true)
-//        naverMap.setLayerGroupEnabled(NaverMap.LAYER_GROUP_TRAFFIC, true)
-//        naverMap.setLayerGroupEnabled(NaverMap.LAYER_GROUP_TRANSIT, true)
-//        naverMap.setLayerGroupEnabled(NaverMap.LAYER_GROUP_TRANSIT, true)
         val uiSettings = naverMap.uiSettings
         naverMap.locationSource = locationSource
 //        locationOverlay = naverMap.locationOverlay
@@ -322,7 +332,6 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                     for (i in 0 until toRemoveFriendsMarker.size) {
                         toRemoveFriendsMarker[i].map = null
                         toRemoveFriendsMarker.removeAt(i)
-//                        removeAllMarker()
                     }
                 }
             }
@@ -572,11 +581,12 @@ class Tab1 : Fragment(), OnMapReadyCallback {
         var subDistListTmp : MutableList<Double> = mutableListOf()
         pathTmp.addAll(path)
         subDistListTmp.addAll(subDistList)
-        curRunningData = RunningData(MainActivity.user._id, startDate, endDate, pathTmp, time, dist, avgPace, subDistListTmp)
+        curRunningData = RunningData("empty_id", MainActivity.user._id, startDate, endDate, pathTmp, time, dist, avgPace, subDistListTmp)
 //        mSocket.emit("endRunning", MainActivity.user._id)
         Thread(endTimeSockerSender).start()
         service.postCreateRunning(curRunningData).enqueue(object: Callback<ResponseDT> {
             override fun onResponse(call: Call<ResponseDT>, response: Response<ResponseDT>) {
+                curRunningData._id = response.body()!!.message
                 MainActivity.user.running.add(response.body()!!.message)
                 // 카메라 이동
                 naverMap.minZoom = 5.0
@@ -594,6 +604,16 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                         naverMap.moveCamera(updated)
                     }
                 }
+
+                captureBtn.setOnClickListener {
+                    naverMap.takeSnapshot(false, this@Tab1)
+                }
+
+
+                /// 캡쳐 버튼 보이게
+
+
+
             }
             override fun onFailure(call: Call<ResponseDT>, t: Throwable) {
                 Log.d("failed", "fail")
@@ -708,9 +728,132 @@ class Tab1 : Fragment(), OnMapReadyCallback {
                 }
             }
     }
+
+    override fun onSnapshotReady(bitmap: Bitmap) {
+        Log.d("snap", bitmap.toString())
+        saveImageToGallery(bitmap)
+    }
+
+    fun changePathtpMultipartBody(path: Uri?, context : Context) {
+        var proj: Array<String> = arrayOf(MediaStore.Images.Media.DATA)
+        var c: Cursor? = context.contentResolver.query(path!!, proj, null, null, null)
+        var index = c?.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+        c?.moveToFirst()
+        var result = c?.getString(index!!)
+        val file = File(result!!)
+//        val requestBody = RequestBody.create(MediaType.parse("image/jpeg"), file)
+//        val fileToUpload = MultipartBody.Part.createFormData("profile", file.name, requestBody)
+
+        val requestFile = RequestBody.create(MediaType.parse("image/jpeg"), file)
+        val body = MultipartBody.Part.createFormData("imageFile", file.name, requestFile)
+        sendImage(body)
+    }
+
+    fun sendImage(image : MultipartBody.Part) {
+        val requestBody: RequestBody = RequestBody.create(MediaType.parse("text/plain"), curRunningData._id)
+        val call = service.captureSend(requestBody, image) //통신 API 패스 설정
+        call.enqueue(object : Callback<String>{
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                if (response?.isSuccessful) {
+                    Log.d("이미지 통신 성공 ",""+response?.body().toString())
+                }
+                else {
+                    Log.d("이미지 통신 실패 ","이미지 통신 실패 ")
+                }
+            }
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                Log.d("로그 ",t.message.toString())
+            }
+        })
+    }
+
+//    private fun sendToServer(bitmap : Bitmap) {
+//        val byteArrayOutputStream = ByteArrayOutputStream()
+//        bitmap.compress(Bitmap.CompressFormat.JPEG, 60, byteArrayOutputStream)
+//        val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
+//        val outStream = ByteArrayOutputStream()
+//        val res: Resources = resources
+//        val profileImageBase64 = Base64.encodeToString(byteArray, NO_WRAP)
+//    }
+
+    private fun saveImageToGallery(bitmap: Bitmap): Boolean{
+        //권한 체크
+        if(!checkPermission(mainActivity, android.Manifest.permission.READ_EXTERNAL_STORAGE) ||
+            !checkPermission(mainActivity, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            return false
+        }
+        //그림 저장
+        if(!context?.let { imageExternalSave(mainActivity, bitmap, it.getString(R.string.app_name)) }!!){
+            Toast.makeText(context, "그림 저장을 실패하였습니다", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        Toast.makeText(activity, "그림이 갤러리에 저장되었습니다", Toast.LENGTH_SHORT).show()
+        return true
+    }
+
+    fun checkPermission(activity: Activity, permission: String): Boolean {
+        val permissionChecker =
+            activity?.let { ContextCompat.checkSelfPermission(it.applicationContext, permission) }
+        //권한이 없으면 권한 요청
+        if (permissionChecker == PackageManager.PERMISSION_GRANTED) return true
+        ActivityCompat.requestPermissions(activity, arrayOf(permission), STRORANGE_EXTERNAL_PERMISSION_REQUEST_CODE)
+        return false
+    }
+
+    @SuppressLint("Range")
+    private fun imageExternalSave(context: Context, bitmap: Bitmap, path: String): Boolean {
+        val state = Environment.getExternalStorageState()
+        if (Environment.MEDIA_MOUNTED == state) {
+            val rootPath =
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                    .toString()
+            val dirName = "/" + curRunningData._id
+            val fileName = curRunningData._id + ".png"
+            val savePath = File(rootPath + dirName)
+            savePath.mkdirs()
+
+            val file = File(savePath, fileName)
+            if (file.exists()) file.delete()
+
+            try {
+                val out = FileOutputStream(file)
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                out.flush()
+                out.close()
+
+                //갤러리 갱신
+                context.sendBroadcast(
+                    Intent(
+                        Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
+                        Uri.parse("file://" + Environment.getExternalStorageDirectory())
+                    )
+                )
+
+                val cursor = context.contentResolver.query(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    null,
+                    "_data = '" + rootPath + dirName + "/" + fileName+ "'",
+                    null,
+                    null
+                )
+
+                cursor!!.moveToNext()
+                val id = cursor!!.getInt(cursor!!.getColumnIndex("_id"))
+                val uri = ContentUris.withAppendedId(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    id.toLong()
+                )
+                changePathtpMultipartBody(uri, mainActivity)
+                return true
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        return false
+    }
 }
 
-object ImageLoader {
+    object ImageLoader {
     suspend fun loadImage(imageUrl: String): Bitmap? {
         val bmp: Bitmap? = null
         try {
