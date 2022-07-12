@@ -14,7 +14,10 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/group_list"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/groupToolbar" />
+            android:layout_height="@dimen/groupToolbar"
+            android:background="@color/dark"
+            android:paddingStart="5dp"
+            android:paddingTop="5dp" />
 
         <com.naver.maps.map.MapView
             android:id="@+id/map"

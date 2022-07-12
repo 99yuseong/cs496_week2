@@ -13,42 +13,31 @@
         <entry key="app/src/main/res/drawable/round.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/roundbackgorund.xml" value="0.1" />
         <entry key="app/src/main/res/layout-w1240dp/activity_login.xml" value="0.1" />
-        <entry key="app/src/main/res/layout/activity_history_detail.xml" value="0.27496337890625" />
+        <entry key="app/src/main/res/layout/activity_history_detail.xml" value="0.27294921875" />
+        <entry key="app/src/main/res/layout/activity_history_detail_temp.xml" value="0.32830505371093754" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.45892333984375" />
-        <entry key="app/src/main/res/layout/activity_main.xml" value="0.19080505371093748" />
-        <entry key="app/src/main/res/layout/add_friend_popup.xml" value="0.2966827392578125" />
-        <entry key="app/src/main/res/layout/create_group_popup.xml" value="0.1" />
-        <entry key="app/src/main/res/layout/create_group_popup1.xml" value="0.25673522949218747" />
-        <entry key="app/src/main/res/layout/create_group_popup2.xml" value="0.34175377828594905" />
-        <entry key="app/src/main/res/layout/fragment_my.xml" value="0.12943262411347517" />
-        <entry key="app/src/main/res/layout/fragment_tab1.xml" value="0.25439955117045965" />
-        <entry key="app/src/main/res/layout/fragment_tab2.xml" value="0.2995361328125" />
-        <entry key="app/src/main/res/layout/fragment_tab3.xml" value="0.27978057861328126" />
-        <entry key="app/src/main/res/layout/fragment_tab4.xml" value="0.4165215533712636" />
-        <entry key="app/src/main/res/layout/fragment_tab4_temp.xml" value="0.35615081787109376" />
-        <entry key="app/src/main/res/layout/friend_item.xml" value="0.44595242131055235" />
-        <entry key="app/src/main/res/layout/group_item.xml" value="0.9189575195312502" />
-        <entry key="app/src/main/res/layout/group_select_item.xml" value="0.7140423982039743" />
-        <entry key="app/src/main/res/layout/history_item.xml" value="0.22395833333333334" />
-        <entry key="app/src/main/res/layout/pace_marker_view.xml" value="0.2694746376811594" />
-        <entry key="app/src/main/res/layout/ranking_list_item.xml" value="0.3609680175781249" />
-        <entry key="app/src/main/res/layout/search_user_item.xml" value="0.41009388799252716" />
-        <entry key="app/src/main/res/layout/selected_friend_item.xml" value="0.3784715735394022" />
-        <entry key="app/src/main/res/layout/user_item.xml" value="0.3015258346778759" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="app/src/main/res/layout/add_friend_popup.xml" value="0.10562310030395136" />
+        <entry key="app/src/main/res/layout/create_group_popup.xml" value="0.1" />
         <entry key="app/src/main/res/layout/create_group_popup1.xml" value="0.58380126953125" />
         <entry key="app/src/main/res/layout/create_group_popup2.xml" value="0.7173179294752039" />
+        <entry key="app/src/main/res/layout/fragment_my.xml" value="0.12943262411347517" />
         <entry key="app/src/main/res/layout/fragment_tab1.xml" value="0.24476229539558075" />
-        <entry key="app/src/main/res/layout/fragment_tab2.xml" value="0.15625" />
-        <entry key="app/src/main/res/layout/fragment_tab3.xml" value="0.24864130434782608" />
-        <entry key="app/src/main/res/layout/fragment_tab4.xml" value="0.1" />
-        <entry key="app/src/main/res/layout/friend_item.xml" value="0.1037037037037037" />
-        <entry key="app/src/main/res/layout/group_item.xml" value="0.5425160725911459" />
-        <entry key="app/src/main/res/layout/history_item.xml" value="0.33177083333333335" />
+        <entry key="app/src/main/res/layout/fragment_tab2.xml" value="0.38494110107421875" />
+        <entry key="app/src/main/res/layout/fragment_tab3.xml" value="0.3815789473684211" />
+        <entry key="app/src/main/res/layout/fragment_tab4.xml" value="0.39831390380859377" />
+        <entry key="app/src/main/res/layout/fragment_tab4_temp.xml" value="0.35615081787109376" />
+        <entry key="app/src/main/res/layout/friend_item.xml" value="0.4145250651382741" />
+        <entry key="app/src/main/res/layout/group_item.xml" value="0.8402928670247396" />
+        <entry key="app/src/main/res/layout/group_select_item.xml" value="0.7140423982039743" />
+        <entry key="app/src/main/res/layout/history_item.xml" value="0.57843017578125" />
+        <entry key="app/src/main/res/layout/history_item_tem.xml" value="0.3302017211914063" />
+        <entry key="app/src/main/res/layout/history_item_temp.xml" value="0.5052988909292913" />
         <entry key="app/src/main/res/layout/pace_marker_view.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/ranking_list_item.xml" value="0.3609680175781249" />
         <entry key="app/src/main/res/layout/search_user_item.xml" value="0.1037037037037037" />
         <entry key="app/src/main/res/layout/selected_friend_item.xml" value="0.1037037037037037" />
+        <entry key="app/src/main/res/layout/user_item.xml" value="0.3015258346778759" />
       </map>
     </option>
   </component>
