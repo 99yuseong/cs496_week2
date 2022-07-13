@@ -9,5 +9,13 @@
 - tab3 : group 탭
 - tab4 : record 탭
 
-## ㅆab1 : running 탭
+## Tab1 : running 탭
 러닝 탭은 네이버 지도 api를 사용하여 
+
+## Tab2 : friend 탭
+
+## Tab3: group 탭
+
+## Tab4: history 탭
+
+## Server & Databbase
